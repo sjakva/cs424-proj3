@@ -80,7 +80,7 @@ view(TaxiSelect)
 #------------------------------------
 ui <- dashboardPage(
   skin = "black",
-  dashboardHeader(title = "Jack Martin and Shoaib Jakvani Project 2"),
+  dashboardHeader(title = "Jack & Shoaib's Project 3"),
   dashboardSidebar(
     disable = FALSE,
     collapsed = FALSE,
