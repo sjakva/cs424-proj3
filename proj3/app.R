@@ -67,11 +67,7 @@ TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Seconds' > 18000]
 TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Pickup Community Area`)]
 TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
 # view(TaxiSelect)
-
 # str(TaxiSelect)
-# 
-# # view(Taxi)
-# 
 
 
 
