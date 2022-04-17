@@ -95,7 +95,11 @@ ui <- dashboardPage(
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("Home", tabName = "home", selected = TRUE),
-      menuItem("About", tabName = "about")
+      menuItem("About", tabName = "about"),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      selectInput("unitToggle", "Kilometers or miles", c('Kilometers', 'Miles')),
+      selectInput("timeToggle", "Time format", c('12 hour (AM/PM)', '24 hour'))
     )
   ),
   dashboardBody(tabItems(
