@@ -66,7 +66,7 @@ TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Seconds' > 18000]
 # 5) drop NA values (trips outside Chicago community)
 TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Pickup Community Area`)]
 TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
-view(TaxiSelect)
+# view(TaxiSelect)
 
 # str(TaxiSelect)
 # 
@@ -79,8 +79,8 @@ view(TaxiSelect)
 
 #------------------------------------
 ui <- dashboardPage(
-  skin = "black",
-  dashboardHeader(title = "Jack & Shoaib's Project 3"),
+  skin = "yellow",
+  dashboardHeader(title = "Jack & Shoaib's Project 3", titleWidth = 300),
   dashboardSidebar(
     disable = FALSE,
     collapsed = FALSE,
@@ -99,30 +99,35 @@ ui <- dashboardPage(
   ),
   dashboardBody(tabItems(
     tabItem(
-      tabName = "home"
-      # box(
-      #   title = "Entries For All Stations On Given Day",
-      #   solidHeader = TRUE,
-      #   status = "primary",
-      #   width = 12, background = "navy"
-      # )
+      tabName = "home",
+      # fluidRow is a grid of 12 width, width of 4 is a 1/3, 6 is 1/2, etc
+      fluidRow(
+        box(
+          title = "Chicago Community Areas",
+          solidHeader = TRUE,
+          status = "warning",    # box header color
+          width = 12, background = "black"    # bg color of box -- black or yellow to blend in
+        )
+      )
     ),
     tabItem(
       tabName = "about",
-      box(
-        title = "About",
-        solidHeader = TRUE,
-        status = "primary",
-        width = 12,
-        
-        
-        h2(
-          "Jack Martin and Shoaib Jakvani created this app for Project 3 of UIC's CS 424 - Visual Analytics."
-        ),
-        p(
-          "This data is from the Chicago Data Portal. More specifically, the \'Taxi Trips - 2019\'.
-                           We were tasked with analyzing and plotting entries over\n
-                          the taxi trips taken in the Chicago community area in 2019, and charting them according to [FIXME: edit after project]."
+      fluidRow(
+        box(
+          title = "About",
+          solidHeader = TRUE,
+          status = "warning",
+          width = 12,
+          
+          
+          h2(
+            "Jack Martin and Shoaib Jakvani created this app for Project 3 of UIC's CS 424 - Visual Analytics."
+          ),
+          p(
+            "This data is from the Chicago Data Portal. More specifically, the \'Taxi Trips - 2019\'.
+                             We were tasked with analyzing and plotting entries over\n
+                            the taxi trips taken in the Chicago community area in 2019, and charting them according to [FIXME: edit after project]."
+          )
         )
       )
     )
