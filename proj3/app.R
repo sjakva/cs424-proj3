@@ -103,10 +103,25 @@ ui <- dashboardPage(
       # fluidRow is a grid of 12 width, width of 4 is a 1/3, 6 is 1/2, etc
       fluidRow(
         box(
-          title = "Chicago Community Areas",
+          title = "Chicago Community Areas Charts",
           solidHeader = TRUE,
           status = "warning",    # box header color
           width = 12, background = "black"    # bg color of box -- black or yellow to blend in
+        )
+      ),
+      
+      fluidRow(
+        box(
+          title = "Tables",
+          solidHeader = TRUE,
+          status = "warning",
+          width = 7, background = "yellow"
+        ),
+        box(
+          title = "Map",
+          solidHeader = TRUE,
+          status = "warning",
+          width = 5, background = "yellow"
         )
       )
     ),
