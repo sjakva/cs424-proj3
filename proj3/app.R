@@ -37,31 +37,44 @@ col_names <- c("Trip Start Timestamp","Trip Seconds", "Trip Miles", "Pickup Comm
 #           colClasses = c("date" = "Date"), select = col_names,
 #           nrows = 10000)
    
+# setClass('yyyymmdd-hhmmss')
+# setClass('mm/dd/yyyy hh:mm:ss')
+
 #   https://data.cityofchicago.org/Transportation/Taxi-Trips-2019/h4cq-z3dy
 # Go two directories out project directory for tsv file
 TaxiSelect <- fread("../../Taxi_Trips_-_2019.tsv",
           # colClasses = c("date" = "Date"), 
           select = col_names,
           nrows = 10000)
-# 
-#
-#
-#   TODO: filter out the rest of the data to cut it to 300 mb
+
+# print(parse_date_time(TaxiSelect$'Trip Start Timestamp', "%m/%d/%Y %I:%M:%S Op"))
+
+
+#   filter out the rest of the data to cut it to 300 mb
 # 1) all trips less than 0.5 miles, 2) more than 100 miles, 
 # 3) less than 60 seconds, 4) greater than 5 hours, 
 # 5) all trips that either start/end outside of a Chicago community
 
-#     also will only be using looking at trips down to a resolution 
-#     of the starting hour rather than the 15 minute intervals in  
-#     the data (?) idk man
-
-# 5) drop NA values
+# 1) all trips less than 0.5 miles
+TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Miles' < 0.5]
+# 2) more than 100 miles
+TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Miles' > 100]
+# 3) less than 60 seconds
+TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Seconds' < 60]
+# 4) greater than 5 hours == 18,000 seconds
+TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Seconds' > 18000]
+# 5) drop NA values (trips outside Chicago community)
 TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Pickup Community Area`)]
 TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
 view(TaxiSelect)
+
+# str(TaxiSelect)
 # 
 # # view(Taxi)
 # 
+
+
+
 # --------------------------------------------------------------
 
 #------------------------------------
