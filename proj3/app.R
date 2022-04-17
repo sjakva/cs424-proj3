@@ -1,13 +1,67 @@
+# --------------------------------------------------------------
 #
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
+#   CS424 - Spring 2022
+# Project 3 -- Big Yellow Taxi
+#   Authors:  Jack Martin 
+#     & Shoaib Jakvani
 #
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+# --------------------------------------------------------------
 
+# --------------------------------------------------------------
+# # install.packages("shiny","tidyverse","shinydashboard","lubridate")
 library(shiny)
+library(lubridate)
+library(ggplot2)
+library(shinydashboard)
+library(plotly)
+library(leaflet)
+library(tidyverse)
+library(DT)
+library(data.table)
+library(dplyr)
+
+
+#   You will only need a subset of the 23 columns in the data 
+#   3.  Trip Start Timestamp    (string -> date and time)
+#   5.  Trip Seconds            (int)
+#   6.  Trip Miles              (float)
+#   9.  Pickup Community Area   (int)
+#   10. Drop-off community Area (int)
+#   17. Company                 (string)
+
+# list of needed columns
+col_names <- c("Trip Start Timestamp","Trip Seconds", "Trip Miles", "Pickup Community Area", "Dropoff Community Area", "Company")
+
+
+# TaxiSelect <- fread("./Taxi_Trips_-_2019.tsv", 
+#           colClasses = c("date" = "Date"), select = col_names,
+#           nrows = 10000)
+   
+# Go two directories out project directory for tsv file
+TaxiSelect <- fread("../../Taxi_Trips_-_2019.tsv",
+          # colClasses = c("date" = "Date"), 
+          select = col_names,
+          nrows = 10000)
+# 
+#
+#
+#   TODO: filter out the rest of the data to cut it to 300 mb
+# 1) all trips less than 0.5 miles, 2) more than 100 miles, 
+# 3) less than 60 seconds, 4) greater than 5 hours, 
+# 5) all trips that either start/end outside of a Chicago community
+
+#     also will only be using looking at trips down to a resolution 
+#     of the starting hour rather than the 15 minute intervals in  
+#     the data (?) idk man
+
+# 5) drop NA values
+TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Pickup Community Area`)]
+TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
+view(TaxiSelect)
+# 
+# # view(Taxi)
+# 
+# --------------------------------------------------------------
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
