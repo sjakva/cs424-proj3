@@ -94,8 +94,15 @@ ui <- dashboardPage(
       menuItem("About", tabName = "about"),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       selectInput("unitToggle", "Kilometers or miles", c('Kilometers', 'Miles')),
-      selectInput("timeToggle", "Time format", c('12 hour (AM/PM)', '24 hour'))
+      selectInput("timeToggle", "Time format", c('12 hour (AM/PM)', '24 hour')),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      selectInput("commToggle", "Community Area", c('choice 1', 'choice 1')),
+      selectInput("destToggle", "From/To", c('Starting from', 'Ending to')),
+      selectInput("compToggle", "Taxi company", c('choice 1', 'choice 1'))
     )
   ),
   dashboardBody(tabItems(
@@ -120,13 +127,14 @@ ui <- dashboardPage(
           title = "Tables",
           solidHeader = TRUE,
           status = "warning",
-          width = 7, background = "yellow"
+          width = 9, background = "yellow"
         ),
         box(
           title = "Map",
           solidHeader = TRUE,
           status = "warning",
-          width = 5, background = "yellow"
+          width = 3, background = "yellow",
+          leafletOutput("initMap")
         )
       )
     ),
@@ -161,6 +169,13 @@ ui <- dashboardPage(
 #   session as a param allows access to information and functionality relating to the session
 server <- function(input, output, session) {
 
+  output$initMap <- renderLeaflet({
+    leaflet() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 10) %>%
+      addProviderTiles(providers$Stamen.Toner,
+                       options = providerTileOptions()
+      )
+  })
+  
 }
 
 # Run the application 
