@@ -37,6 +37,7 @@ col_names <- c("Trip Start Timestamp","Trip Seconds", "Trip Miles", "Pickup Comm
 #           colClasses = c("date" = "Date"), select = col_names,
 #           nrows = 10000)
    
+#   https://data.cityofchicago.org/Transportation/Taxi-Trips-2019/h4cq-z3dy
 # Go two directories out project directory for tsv file
 TaxiSelect <- fread("../../Taxi_Trips_-_2019.tsv",
           # colClasses = c("date" = "Date"), 
