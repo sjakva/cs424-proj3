@@ -99,13 +99,13 @@ ui <- dashboardPage(
   ),
   dashboardBody(tabItems(
     tabItem(
-      tabName = "home",
-      box(
-        title = "Entries For All Stations On Given Day",
-        solidHeader = TRUE,
-        status = "primary",
-        width = 12, background = "navy"
-      )
+      tabName = "home"
+      # box(
+      #   title = "Entries For All Stations On Given Day",
+      #   solidHeader = TRUE,
+      #   status = "primary",
+      #   width = 12, background = "navy"
+      # )
     ),
     tabItem(
       tabName = "about",
@@ -117,13 +117,12 @@ ui <- dashboardPage(
         
         
         h2(
-          "Jack Martin and Shoaib Jakvani created this app for Project 2 of UIC's CS 424 - Visual Analytics."
+          "Jack Martin and Shoaib Jakvani created this app for Project 3 of UIC's CS 424 - Visual Analytics."
         ),
         p(
-          "This data is from the Chicago Data Portal. More specifically, the \'CTA - Ridership - L Station Entries - Daily total\'.
-                           The main components on why we are given this project is to teach us and give better familiarity with\n
-                          both the R language and Shiny and Shiny dashboard and also using leaflet and its applications. We were tasked with analyzing and plotting Entries over\n
-                          specific stations over 2001-2021 and plotting graphs from Project one for each station upon interacting with the leaflet map."
+          "This data is from the Chicago Data Portal. More specifically, the \'Taxi Trips - 2019\'.
+                           We were tasked with analyzing and plotting entries over\n
+                          the taxi trips taken in the Chicago community area in 2019, and charting them according to [FIXME: edit after project]."
         )
       )
     )
