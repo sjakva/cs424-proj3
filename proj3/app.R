@@ -77,6 +77,7 @@ TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
 
 # --------------------------------------------------------------
 
+
 #------------------------------------
 ui <- dashboardPage(
   skin = "yellow",
@@ -102,11 +103,15 @@ ui <- dashboardPage(
       tabName = "home",
       # fluidRow is a grid of 12 width, width of 4 is a 1/3, 6 is 1/2, etc
       fluidRow(
-        box(
+        tabBox(
           title = "Chicago Community Areas Charts",
-          solidHeader = TRUE,
-          status = "warning",    # box header color
-          width = 12, background = "black"    # bg color of box -- black or yellow to blend in
+          width = 12,
+          tabPanel("Day of year", "first tab"),
+          tabPanel("Hour of day", "tab tab tab"),
+          tabPanel("Day of week", "tab tab tab"),
+          tabPanel("Month", "tab tab tab"),
+          tabPanel("Mileage", "tab tab tab"),
+          tabPanel("Trip time", "tab tab tab")
         )
       ),
       
