@@ -63,43 +63,46 @@ CommSelect <- fread("./CommAreas.tsv",
 # get rid of "  MULTIPOLYGON (((  "
 CommSelect$'geometry' <- str_replace_all(CommSelect$'geometry', "MULTIPOLYGON [(][(][(]", "")
 
-#Start-documentation for cleaning data ------------------------------------
-#   filter out the rest of the data to cut it to 300 mb
-# 1) all trips less than 0.5 miles, 2) more than 100 miles, 
-# 3) less than 60 seconds, 4) greater than 5 hours, 
-# 5) all trips that either start/end outside of a Chicago community
 
-# 1) all trips less than 0.5 miles
-TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Miles' < 0.5]
-# 2) more than 100 miles
-TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Miles' > 100]
-# 3) less than 60 seconds
-TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Seconds' < 60]
-# 4) greater than 5 hours == 18,000 seconds
-TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Seconds' > 18000]
-# 5) drop NA values (trips outside Chicago community)
-TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Pickup Community Area`)]
-TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
 
-# view(unique)
-valMap = c(1:55)
 
-#use integers to denote different companies in order to reduce file size
-TaxiSelect$Company = mapvalues(TaxiSelect$Company, unique, valMap)
-
-# turns timestamp of starting trip to easier data to work with: hour/date
-TaxiSelect$NewDate <- parse_date_time(TaxiSelect$'Trip Start Timestamp', "%m/%d/%Y %I:%M:%S Op")
-TaxiSelect$Hour <- hour(TaxiSelect$NewDate)
-TaxiSelect$Date <- date(TaxiSelect$NewDate)
-
-#removes unneeded columns to save file size
-TaxiSelect <- subset (TaxiSelect, select = -NewDate)
-TaxiSelect <- subset (TaxiSelect, select = -`Trip Start Timestamp`)
-
-#writes result to csv file
-fwrite(TaxiSelect,"TaxiData.csv")
-
-# end-documentation of cleaning data----------------------------------------/
+# #Start-documentation for cleaning data ------------------------------------
+# #   filter out the rest of the data to cut it to 300 mb
+# # 1) all trips less than 0.5 miles, 2) more than 100 miles, 
+# # 3) less than 60 seconds, 4) greater than 5 hours, 
+# # 5) all trips that either start/end outside of a Chicago community
+# 
+# # 1) all trips less than 0.5 miles
+# TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Miles' < 0.5]
+# # 2) more than 100 miles
+# TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Miles' > 100]
+# # 3) less than 60 seconds
+# TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Seconds' < 60]
+# # 4) greater than 5 hours == 18,000 seconds
+# TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Seconds' > 18000]
+# # 5) drop NA values (trips outside Chicago community)
+# TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Pickup Community Area`)]
+# TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
+# 
+# # view(unique)
+# valMap = c(1:55)
+# 
+# #use integers to denote different companies in order to reduce file size
+# TaxiSelect$Company = mapvalues(TaxiSelect$Company, unique, valMap)
+# 
+# # turns timestamp of starting trip to easier data to work with: hour/date
+# TaxiSelect$NewDate <- parse_date_time(TaxiSelect$'Trip Start Timestamp', "%m/%d/%Y %I:%M:%S Op")
+# TaxiSelect$Hour <- hour(TaxiSelect$NewDate)
+# TaxiSelect$Date <- date(TaxiSelect$NewDate)
+# 
+# #removes unneeded columns to save file size
+# TaxiSelect <- subset (TaxiSelect, select = -NewDate)
+# TaxiSelect <- subset (TaxiSelect, select = -`Trip Start Timestamp`)
+# 
+# #writes result to csv file
+# fwrite(TaxiSelect,"TaxiData.csv")
+# 
+# # end-documentation of cleaning data----------------------------------------/
 
 # FIXME: maybe dont drop na vals?
 # CommSelect <- CommSelect[!is.na(CommSelect$`AREA_NUM_1`)]
@@ -108,7 +111,7 @@ view(CommSelect)
 
 # bounds <- sf::st_as_sf(CommSelect, wkt='geometry')
 # bounds <- sf::st_cast(CommSelect$'geometry', 'MULTIPOLYGON')
-bounds <- sf::st_as_sfc(CommSelect$'geometry', GeoJSON = TRUE, EWKB = TRUE)
+# bounds <- sf::st_as_sfc(CommSelect$'geometry', GeoJSON = TRUE, EWKB = TRUE)
 
 
 # --------------------------------------------------------------
@@ -213,9 +216,10 @@ server <- function(input, output, session) {
     leaflet() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 10) %>%
       addProviderTiles(providers$Stamen.Toner,
                        options = providerTileOptions()
-      ) %>% addPolygons(data = CommSelect$'geometry', weight = 1, label = CommSelect$'COMMUNITY',
-                    highlightOptions = highlightOptions(color = "white", weight = 2,
-                                                        bringToFront = TRUE))
+      ) 
+    # %>% addPolygons(data = CommSelect$'geometry', weight = 1, label = CommSelect$'COMMUNITY',
+    #                 highlightOptions = highlightOptions(color = "white", weight = 2,
+    #                                                     bringToFront = TRUE))
   })
   
 }
