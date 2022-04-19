@@ -52,21 +52,18 @@ boundary_cols <- c(
 # Go two directories out project directory for tsv file
 TaxiSelect <- fread("../../Taxi_Trips_-_2019.tsv",
           # colClasses = c("date" = "Date"), 
-          select = col_names,
-          nrows = 10000)
+          select = col_names)
 # read in boundary data from 
 #   https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6
 # leaflet can read in the boundary polygon id's
 CommSelect <- fread("./CommAreas.tsv",
                     # colClasses = c("date" = "Date"), 
-                    select = boundary_cols,
-                    nrows = 1000)
+                    select = boundary_cols
+                    )
 # get rid of "  MULTIPOLYGON (((  "
 CommSelect$'geometry' <- str_replace_all(CommSelect$'geometry', "MULTIPOLYGON [(][(][(]", "")
 
-# print(parse_date_time(TaxiSelect$'Trip Start Timestamp', "%m/%d/%Y %I:%M:%S Op"))
-
-
+#Start-documentation for cleaning data ------------------------------------
 #   filter out the rest of the data to cut it to 300 mb
 # 1) all trips less than 0.5 miles, 2) more than 100 miles, 
 # 3) less than 60 seconds, 4) greater than 5 hours, 
@@ -83,8 +80,26 @@ TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Seconds' > 18000]
 # 5) drop NA values (trips outside Chicago community)
 TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Pickup Community Area`)]
 TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
-# view(TaxiSelect)
-# str(TaxiSelect)
+
+# view(unique)
+valMap = c(1:55)
+
+#use integers to denote different companies in order to reduce file size
+TaxiSelect$Company = mapvalues(TaxiSelect$Company, unique, valMap)
+
+# turns timestamp of starting trip to easier data to work with: hour/date
+TaxiSelect$NewDate <- parse_date_time(TaxiSelect$'Trip Start Timestamp', "%m/%d/%Y %I:%M:%S Op")
+TaxiSelect$Hour <- hour(TaxiSelect$NewDate)
+TaxiSelect$Date <- date(TaxiSelect$NewDate)
+
+#removes unneeded columns to save file size
+TaxiSelect <- subset (TaxiSelect, select = -NewDate)
+TaxiSelect <- subset (TaxiSelect, select = -`Trip Start Timestamp`)
+
+#writes result to csv file
+fwrite(TaxiSelect,"TaxiData.csv")
+
+# end-documentation of cleaning data----------------------------------------/
 
 # FIXME: maybe dont drop na vals?
 # CommSelect <- CommSelect[!is.na(CommSelect$`AREA_NUM_1`)]
