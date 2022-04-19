@@ -8,7 +8,7 @@
 # --------------------------------------------------------------
 
 # --------------------------------------------------------------
-# # install.packages("shiny","tidyverse","shinydashboard","lubridate")
+# # install.packages("shiny","tidyverse","shinydashboard","lubridate", "sf")
 library(shiny)
 library(lubridate)
 library(ggplot2)
@@ -19,6 +19,7 @@ library(tidyverse)
 library(DT)
 library(data.table)
 library(dplyr)
+library(sf)
 
 
 #   You will only need a subset of the 23 columns in the data 
@@ -59,6 +60,8 @@ CommSelect <- fread("./CommAreas.tsv",
                     # colClasses = c("date" = "Date"), 
                     select = boundary_cols,
                     nrows = 1000)
+# get rid of "  MULTIPOLYGON (((  "
+CommSelect$'geometry' <- str_replace_all(CommSelect$'geometry', "MULTIPOLYGON [(][(][(]", "")
 
 # print(parse_date_time(TaxiSelect$'Trip Start Timestamp', "%m/%d/%Y %I:%M:%S Op"))
 
@@ -86,6 +89,11 @@ TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
 # CommSelect <- CommSelect[!is.na(CommSelect$`AREA_NUM_1`)]
 
 view(CommSelect)
+
+# bounds <- sf::st_as_sf(CommSelect, wkt='geometry')
+# bounds <- sf::st_cast(CommSelect$'geometry', 'MULTIPOLYGON')
+# bounds <- sf::st_as_sfc(CommSelect$'geometry', GeoJSON = TRUE)
+# print(bounds)
 
 
 # --------------------------------------------------------------
