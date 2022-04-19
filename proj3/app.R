@@ -31,7 +31,13 @@ library(dplyr)
 
 # list of needed columns
 col_names <- c("Trip Start Timestamp","Trip Seconds", "Trip Miles", "Pickup Community Area", "Dropoff Community Area", "Company")
-
+boundary_cols <- c(
+  "geometry",     # polygon id
+  "COMMUNITY",    # community name
+  "AREA_NUM_1",   # community num
+  "SHAPE_AREA",   # might not need these two
+  "SHAPE_LEN"     #  keep in case map can input?
+)
 
 # TaxiSelect <- fread("./Taxi_Trips_-_2019.tsv", 
 #           colClasses = c("date" = "Date"), select = col_names,
@@ -46,6 +52,13 @@ TaxiSelect <- fread("../../Taxi_Trips_-_2019.tsv",
           # colClasses = c("date" = "Date"), 
           select = col_names,
           nrows = 10000)
+# read in boundary data from 
+#   https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6
+# leaflet can read in the boundary polygon id's
+CommSelect <- fread("./CommAreas.tsv",
+                    # colClasses = c("date" = "Date"), 
+                    select = boundary_cols,
+                    nrows = 1000)
 
 # print(parse_date_time(TaxiSelect$'Trip Start Timestamp', "%m/%d/%Y %I:%M:%S Op"))
 
@@ -69,6 +82,10 @@ TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
 # view(TaxiSelect)
 # str(TaxiSelect)
 
+# FIXME: not dropping values
+CommSelect <- CommSelect[!is.na(CommSelect$`COMMUNITY`)]
+
+view(CommSelect)
 
 
 # --------------------------------------------------------------
@@ -173,7 +190,9 @@ server <- function(input, output, session) {
     leaflet() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 10) %>%
       addProviderTiles(providers$Stamen.Toner,
                        options = providerTileOptions()
-      )
+      ) %>% addPolygons(data = CommSelect$'geometry', weight = 1, label = CommSelect$'COMMUNITY',
+                    highlightOptions = highlightOptions(color = "white", weight = 2,
+                                                        bringToFront = TRUE))
   })
   
 }
