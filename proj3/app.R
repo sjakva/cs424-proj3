@@ -82,8 +82,8 @@ TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
 # view(TaxiSelect)
 # str(TaxiSelect)
 
-# FIXME: not dropping values
-CommSelect <- CommSelect[!is.na(CommSelect$`AREA_NUM_1`)]
+# FIXME: maybe dont drop na vals?
+# CommSelect <- CommSelect[!is.na(CommSelect$`AREA_NUM_1`)]
 
 view(CommSelect)
 
