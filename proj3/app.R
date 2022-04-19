@@ -20,6 +20,7 @@ library(DT)
 library(data.table)
 library(dplyr)
 library(sf)
+# library(geojsonio)
 
 
 #   You will only need a subset of the 23 columns in the data 
@@ -93,7 +94,6 @@ view(CommSelect)
 # bounds <- sf::st_as_sf(CommSelect, wkt='geometry')
 # bounds <- sf::st_cast(CommSelect$'geometry', 'MULTIPOLYGON')
 bounds <- sf::st_as_sfc(CommSelect$'geometry', GeoJSON = TRUE, EWKB = TRUE)
-print(bounds)
 
 
 # --------------------------------------------------------------
