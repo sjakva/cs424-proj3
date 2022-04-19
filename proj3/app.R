@@ -51,15 +51,14 @@ boundary_cols <- c(
 # Go two directories out project directory for tsv file
 TaxiSelect <- fread("../../Taxi_Trips_-_2019.tsv",
           # colClasses = c("date" = "Date"), 
-          select = col_names,
-          nrows = 10000)
+          select = col_names)
 # read in boundary data from 
 #   https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6
 # leaflet can read in the boundary polygon id's
 CommSelect <- fread("./CommAreas.tsv",
                     # colClasses = c("date" = "Date"), 
-                    select = boundary_cols,
-                    nrows = 1000)
+                    select = boundary_cols
+                    )
 # get rid of "  MULTIPOLYGON (((  "
 CommSelect$'geometry' <- str_replace_all(CommSelect$'geometry', "MULTIPOLYGON [(][(][(]", "")
 
