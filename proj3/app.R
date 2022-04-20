@@ -42,23 +42,14 @@ col_names <- c(
   )
 
 # TaxiSelect <- fread("./Taxi_Trips_-_2019.tsv", 
-#           colClasses = c("date" = "Date"), select = col_names,
+#           select = col_names,
 #           nrows = 10000)
 
-# read in boundary data from 
-#   https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6
-boundsRead = readOGR(dsn=getwd(), layer="geo_export")
-view(head(boundsRead))
-# summary(boundsRead)
-
-
-
-# #Start-documentation for cleaning data ------------------------------------
+# #Start-documentation for cleaning data -------------------------------------/
 
 #   https://data.cityofchicago.org/Transportation/Taxi-Trips-2019/h4cq-z3dy
 # Go two directories out project directory for tsv file
 # TaxiSelect <- fread("../../Taxi_Trips_-_2019.tsv",
-#                     # colClasses = c("date" = "Date"), 
 #                     select = col_names)
 
 # #   filter out the rest of the data to cut it to 300 mb
@@ -96,6 +87,8 @@ view(head(boundsRead))
 # 
 # # end-documentation of cleaning data----------------------------------------/
 
+
+
 # merging files together start -----------------------------
 tbl_fread <- 
   list.files(pattern = "*.csv") %>% 
@@ -103,6 +96,12 @@ tbl_fread <-
 #end-merging files together --------------------------------
 view(head(tbl_fread))
 
+
+# read in boundary data from 
+#   https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6
+boundsRead = readOGR(dsn=getwd(), layer="geo_export")
+view(head(boundsRead))
+# summary(boundsRead)
 
 # --------------------------------------------------------------
 
@@ -146,12 +145,12 @@ ui <- dashboardPage(
         tabBox(
           title = "Chicago Community Areas Charts",
           width = 12,
-          tabPanel("Day of year", "first tab"),
-          tabPanel("Hour of day", "tab tab tab"),
-          tabPanel("Day of week", "tab tab tab"),
-          tabPanel("Month", "tab tab tab"),
-          tabPanel("Mileage", "tab tab tab"),
-          tabPanel("Trip time", "tab tab tab")
+          tabPanel("Day of year", "the distribution of the number of rides by day of year (Jan 1 through Dec 31)"),
+          tabPanel("Hour of day", "the distribution of the number of rides by hour of day based on start time (midnight through 11pm)"),
+          tabPanel("Day of week", "the distribution of the number of rides by day of week (Monday through Sunday)"),
+          tabPanel("Month", "the distribution of the number of rides by month of year (Jan through Dec)"),
+          tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
+          tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
         )
       ),
       
