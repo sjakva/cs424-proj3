@@ -101,8 +101,7 @@ tbl_fread <-
   list.files(pattern = "*.csv") %>% 
   map_df(~fread(.))
 #end-merging files together --------------------------------
-
-head(tbl_fread)
+view(head(tbl_fread))
 
 
 # --------------------------------------------------------------
@@ -206,8 +205,8 @@ server <- function(input, output, session) {
   output$initMap <- renderLeaflet({
     leaflet() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 10) %>%
       addProviderTiles(providers$Stamen.Terrain, options = providerTileOptions()
-      ) %>% addPolygons(data = boundsRead, weight = 1, fillColor = "gold", fill = "green", label = ~community,
-                    highlightOptions = highlightOptions(color = "orange", weight = 2,
+      ) %>% addPolygons(data = boundsRead, weight = 2, fillColor = "gold", fill = "purple",
+              label = ~community, highlightOptions = highlightOptions(color = "orange", weight = 2,
                                                         bringToFront = TRUE))
   })
   
