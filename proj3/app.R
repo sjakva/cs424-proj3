@@ -8,7 +8,7 @@
 # --------------------------------------------------------------
 
 # --------------------------------------------------------------
-# # install.packages("shiny","tidyverse","shinydashboard","lubridate", "sf")
+# # install.packages("shiny","tidyverse","shinydashboard","lubridate", "sf", "rgdal")
 library(shiny)
 library(lubridate)
 library(ggplot2)
@@ -20,9 +20,7 @@ library(DT)
 library(data.table)
 library(dplyr)
 library(sf)
-# library(geojsonio)
 library(rgdal)
-
 
 #   You will only need a subset of the 23 columns in the data 
 #   3.  Trip Start Timestamp    (string -> date and time)
@@ -103,6 +101,16 @@ boundsRead = readOGR(dsn=getwd(), layer="geo_export")
 view(head(boundsRead))
 # summary(boundsRead)
 
+
+# number of rides per day over the year -- %b denotes abbr. month name
+daysColNames = c("Date", "Count")
+dataDaysByYear <- tbl_fread %>% 
+                      group_by(format(tbl_fread$Date, "%b. %d")) %>% summarise(count=n())
+# rename columns
+colnames(dataDaysByYear) = daysColNames
+view(dataDaysByYear)
+# print(format(tbl_fread$Date, "%Om %d"))
+
 # --------------------------------------------------------------
 
 
@@ -145,7 +153,8 @@ ui <- dashboardPage(
         tabBox(
           title = "Chicago Community Areas Charts",
           width = 12,
-          tabPanel("Day of year", "the distribution of the number of rides by day of year (Jan 1 through Dec 31)"),
+          tabPanel("Day of year", "the distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                   plotOutput("daysOfYearPlot", width = "100%")),
           tabPanel("Hour of day", "the distribution of the number of rides by hour of day based on start time (midnight through 11pm)"),
           tabPanel("Day of week", "the distribution of the number of rides by day of week (Monday through Sunday)"),
           tabPanel("Month", "the distribution of the number of rides by month of year (Jan through Dec)"),
@@ -200,13 +209,55 @@ ui <- dashboardPage(
 # Define server logic
 #   session as a param allows access to information and functionality relating to the session
 server <- function(input, output, session) {
-
+  # TODO: implement reactive date ----------------------------------- //
+  # # changes dataset based on day
+  # dateReactive <-
+  #   reactive({
+  #     subset(stationsAll, stationsAll$date == input$inputDate)
+  #   })
+  # 
+  # # shifts data by one day in the past
+  # observeEvent(input$left, {
+  #   updateDateInput(
+  #     session,
+  #     "inputDate",
+  #     value = input$inputDate - days(1),
+  #     min = '2001-01-01',
+  #     max = '2021-11-30'
+  #   )
+  # })
+  # # shifts data by one day in the future
+  # observeEvent(input$right, {
+  #   updateDateInput(
+  #     session,
+  #     "inputDate",
+  #     value = input$inputDate + days(1),
+  #     min = '2001-01-01',
+  #     max = '2021-11-30'
+  #   )
+  # })
+  # ----------------------------------------------------------------- //
+  
+  
   output$initMap <- renderLeaflet({
     leaflet() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 10) %>%
       addProviderTiles(providers$Stamen.Terrain, options = providerTileOptions()
       ) %>% addPolygons(data = boundsRead, weight = 1.25, fillColor = "#d087e6", fillOpacity = 0.4, color ="#ffad33", opacity = 0.7,
               label = ~community, highlightOptions = highlightOptions(color = "#0f7a6c", fillOpacity = 0.8, weight = 2,
                                                         bringToFront = TRUE))
+  })
+  
+  output$daysOfYearPlot <- renderPlot({
+    # TODO: reactive title? ----------------------------------------- //
+    # reactiveTitle <- paste("Number of rides by day per ", input$inputYear)
+    # newDate <- dateReactive()
+    # --------------------------------------------------------------- //
+    
+    ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+      labs(x = "Day", y = "Total number of rides") + theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12)) +
+      theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+      # scale_x_discrete(guide = guide_axis(angle = 90))
   })
   
 }
