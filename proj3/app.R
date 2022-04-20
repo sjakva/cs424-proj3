@@ -21,6 +21,22 @@ library(data.table)
 library(dplyr)
 library(sf)
 library(rgdal)
+library(scales)
+
+monthsAbbr <- c(
+  "Jan.",
+  "Feb.",
+  "Mar.",
+  "Apr.",
+  "May.",
+  "Jun.",
+  "Jul.",
+  "Aug.",
+  "Sep.",
+  "Oct.",
+  "Nov.",
+  "Dec."
+)
 
 #   You will only need a subset of the 23 columns in the data 
 #   3.  Trip Start Timestamp    (string -> date and time)
@@ -104,6 +120,7 @@ view(head(boundsRead))
 
 # number of rides per day over the year -- %b denotes abbr. month name
 daysColNames = c("Date", "Count")
+# TODO: fix so that its sorted by date not alphabetical (i.e. starts with April right now)
 dataDaysByYear <- tbl_fread %>% 
                       group_by(format(tbl_fread$Date, "%b. %d")) %>% summarise(count=n())
 # rename columns
@@ -255,8 +272,7 @@ server <- function(input, output, session) {
     
     ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Day", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) 
-      # scale_x_discrete(guide = guide_axis(angle = 90))
+      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
   })
   
 }
