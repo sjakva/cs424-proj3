@@ -255,8 +255,7 @@ server <- function(input, output, session) {
     
     ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Day", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12)) +
-      theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) 
       # scale_x_discrete(guide = guide_axis(angle = 90))
   })
   
