@@ -205,8 +205,8 @@ server <- function(input, output, session) {
   output$initMap <- renderLeaflet({
     leaflet() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 10) %>%
       addProviderTiles(providers$Stamen.Terrain, options = providerTileOptions()
-      ) %>% addPolygons(data = boundsRead, weight = 1.25, fillColor = "#d087e6", fillOpacity = 0.2, color ="#ffad33", opacity = 0.7,
-              label = ~community, highlightOptions = highlightOptions(color = "#0f7a6c", fillOpacity = 0.6, weight = 2,
+      ) %>% addPolygons(data = boundsRead, weight = 1.25, fillColor = "#d087e6", fillOpacity = 0.4, color ="#ffad33", opacity = 0.7,
+              label = ~community, highlightOptions = highlightOptions(color = "#0f7a6c", fillOpacity = 0.8, weight = 2,
                                                         bringToFront = TRUE))
   })
   
