@@ -130,6 +130,7 @@ hoursColNames = c("Hour","Count")
 dataHoursByDay <- Taxi %>%
   group_by(Taxi$Hour) %>% summarise(count=n())
 colnames(dataHoursByDay) = hoursColNames
+view(dataHoursByDay)
 
 # number of rides by day of week (Monday through Sunday)
 dayColNames = c("Day","Count")
@@ -204,7 +205,7 @@ ui <- dashboardPage(
           title = "Chicago Community Areas Charts",
           width = 12,
           tabPanel("Day of year",    plotOutput("daysOfYearPlot", width = "100%")),
-          tabPanel("Hour of day", "the distribution of the number of rides by hour of day based on start time (midnight through 11pm)"),
+          tabPanel("Hour of day",    plotOutput("hoursByDayPlot", width = "100%")),
           tabPanel("Day of week", "the distribution of the number of rides by day of week (Monday through Sunday)"),
           tabPanel("Month", "the distribution of the number of rides by month of year (Jan through Dec)"),
           tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
@@ -217,7 +218,7 @@ ui <- dashboardPage(
           title = "Chicago Community Areas Charts",
           width = 9,
           tabPanel("Day of year",    dataTableOutput("daysOfYearTable")),
-          tabPanel("Hour of day", "the distribution of the number of rides by hour of day based on start time (midnight through 11pm)"),
+          tabPanel("Hour of day",    dataTableOutput("hoursByDayTable")),
           tabPanel("Day of week", "the distribution of the number of rides by day of week (Monday through Sunday)"),
           tabPanel("Month", "the distribution of the number of rides by month of year (Jan through Dec)"),
           tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
@@ -338,20 +339,21 @@ server <- function(input, output, session) {
   # distribution of the number of rides by hour of day based on start time (midnight through 11pm)
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
-  output$daysOfYearPlot <- renderPlot({
+  output$hoursByDayPlot <- renderPlot({
     
-    ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
-      labs(x = "Day", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + 
-      scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+    ggplot(dataHoursByDay, aes(x = Hour, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+      labs(x = "Hour", y = "Total number of rides") + theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) + 
+      coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
+      # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
   })
   # ---------------------------------------------------------------------- //
   #   //  Table   //
-  output$daysOfYearTable <- DT::renderDataTable(DT::datatable({
+  output$hoursByDayTable <- DT::renderDataTable(DT::datatable({
     
-    dataDaysByYear$Date <- format(dataDaysByYear$Date, "%b. %d")
-    dataDaysByYear$Count <- formatC(dataDaysByYear$Count, big.mark = ",")
-    dataDaysByYear
+    # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
+    dataHoursByDay$Count <- formatC(dataHoursByDay$Count, big.mark = ",")
+    dataHoursByDay
   }))
   # ---------------------------------------------------------------------- //
   
