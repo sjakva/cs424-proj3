@@ -117,14 +117,47 @@ boundsRead = readOGR(dsn=getwd(), layer="geo_export")
 view(head(boundsRead))
 # summary(boundsRead)
 
-
+#start-barchart stuff --------------------------------
 # number of rides per day over the year
 daysColNames = c("Date", "Count")
 dataDaysByYear <- Taxi %>% 
-                      group_by(as.Date(Taxi$Date)) %>% summarise(count=n())
-# rename columns
+  group_by(as.Date(Taxi$Date)) %>% summarise(count=n())
+
 colnames(dataDaysByYear) = daysColNames
-view(dataDaysByYear)
+#number of rides by hour of day based on start time (midnight through 11pm)
+
+hoursColNames = c("Hour","Count")
+dataHoursByDay <- Taxi %>%
+  group_by(Taxi$Hour) %>% summarise(count=n())
+colnames(dataHoursByDay) = hoursColNames
+
+# number of rides by day of week (Monday through Sunday)
+dayColNames = c("Day","Count")
+x <- c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")
+y <-c("1","2","3","4","5","6","0")
+dataWeekDay <- Taxi %>%
+  group_by(as.POSIXlt(Taxi$Date)$wday) %>% summarise(count=n())
+colnames(dataWeekDay) = dayColNames
+
+dataWeekDay2 <- dataWeekDay %>%
+  slice(match(y, dataWeekDay$Day))
+dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = c("1","2","3","4","5","6","0"))
+view(dataWeekDay2)
+
+# TODO: FIX LABEL and touching bottom
+dataWeekDay2 %>%
+  ggplot(aes(Day, Count)) +
+  geom_bar(stat = "identity", fill = "#88CCEE") +
+  theme_bw() +
+  scale_x_discrete(labels = x)+
+  labs(x = "Day Type", y = "Number of Rides", title = "Rides per Day Type")
+
+# number of rides by month of year (Jan through Dec) TODO still
+hoursColNames = c("Month","Count")
+dataHoursByDay <- Taxi %>%
+  group_by(Taxi$Hour) %>% summarise(count=n())
+colnames(dataHoursByDay) = hoursColNames
+#end-barchart stuff --------------------------------
 
 # --------------------------------------------------------------
 
