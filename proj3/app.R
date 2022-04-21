@@ -273,8 +273,8 @@ server <- function(input, output, session) {
     
     ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Day", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) + 
-        scale_x_date(date_breaks = "1 week", date_labels = "%b. %d")
+      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + 
+        scale_x_date(date_breaks = "5 days", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
   })
   
 }
