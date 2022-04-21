@@ -104,11 +104,11 @@ col_names <- c(
 
 
 # merging files together start -----------------------------
-tbl_fread <- 
+Taxi <- 
   list.files(pattern = "*.csv") %>% 
   map_df(~fread(.))
 #end-merging files together --------------------------------
-view(head(tbl_fread))
+view(head(Taxi))
 
 
 # read in boundary data from 
@@ -120,14 +120,14 @@ view(head(boundsRead))
 
 # number of rides per day over the year
 daysColNames = c("Date", "Count")
-dataDaysByYear <- tbl_fread %>% 
-                      group_by(as.Date(tbl_fread$Date)) %>% summarise(count=n())
+dataDaysByYear <- Taxi %>% 
+                      group_by(as.Date(Taxi$Date)) %>% summarise(count=n())
 # TODO: relabel values
-# tbl_fread$Date <- as.Date((tbl_fread$Date), format="%b. %d")
+# Taxi$Date <- as.Date((Taxi$Date), format="%b. %d")
 # rename columns
 colnames(dataDaysByYear) = daysColNames
 view(dataDaysByYear)
-# print(format(tbl_fread$Date, "%Om %d"))
+# print(format(Taxi$Date, "%Om %d"))
 
 # --------------------------------------------------------------
 
@@ -158,9 +158,9 @@ ui <- dashboardPage(
       selectInput("timeToggle", "Time format", c('12 hour (AM/PM)', '24 hour')),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      selectInput("commToggle", "Community Area", c('choice 1', 'choice 1')),
+      selectInput("commToggle", "Community Area", c('choice 1', 'choice 2')),
       selectInput("destToggle", "From/To", c('Starting from', 'Ending to')),
-      selectInput("compToggle", "Taxi company", c('choice 1', 'choice 1'))
+      selectInput("compToggle", "Taxi company", c('choice 1', 'choice 2'))
     )
   ),
   dashboardBody(tabItems(
@@ -181,12 +181,17 @@ ui <- dashboardPage(
       ),
       
       fluidRow(
-        box(
-          title = "Tables",
-          solidHeader = TRUE,
-          status = "warning",
-          width = 9, background = "yellow"
+        tabBox(
+          title = "Chicago Community Areas Charts",
+          width = 9,
+          tabPanel("Day of year",    dataTableOutput("daysOfYearTable")),
+          tabPanel("Hour of day", "the distribution of the number of rides by hour of day based on start time (midnight through 11pm)"),
+          tabPanel("Day of week", "the distribution of the number of rides by day of week (Monday through Sunday)"),
+          tabPanel("Month", "the distribution of the number of rides by month of year (Jan through Dec)"),
+          tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
+          tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
         ),
+        
         box(
           title = "Map",
           solidHeader = TRUE,
@@ -195,6 +200,22 @@ ui <- dashboardPage(
           leafletOutput("initMap")
         )
       )
+      
+      # fluidRow(
+      #   box(
+      #     title = "Tables",
+      #     solidHeader = TRUE,
+      #     status = "warning",
+      #     width = 9, background = "yellow"
+      #   ),
+      #   box(
+      #     title = "Map",
+      #     solidHeader = TRUE,
+      #     status = "warning",
+      #     width = 3, background = "yellow",
+      #     leafletOutput("initMap")
+      #   )
+      # )
     ),
     tabItem(
       tabName = "about",
@@ -276,6 +297,17 @@ server <- function(input, output, session) {
         scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
         #           TODO: change date_breaks to 5 days if screen test fails
   })
+  # --------
+  # Table //
+  output$daysOfYearTable <- DT::renderDataTable(DT::datatable({
+    # TODO: reactive title? ----------------------------------------- //
+    # reactiveTitle <- paste("Number of rides by day per ", input$inputYear)
+    # newDate <- dateReactive()
+    # --------------------------------------------------------------- //
+    
+    dataDaysByYear$Date <- format(dataDaysByYear$Date, "%b. %d")
+    dataDaysByYear
+  }))
   
 }
 
