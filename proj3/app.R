@@ -145,13 +145,13 @@ dataWeekDay2 <- dataWeekDay %>%
 dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = c("1","2","3","4","5","6","0"))
 view(dataWeekDay2)
 
-# TODO: FIX LABEL and touching bottom
-dataWeekDay2 %>%
-  ggplot(aes(Day, Count)) +
-  geom_bar(stat = "identity", fill = "#88CCEE") +
-  theme_bw() +
-  scale_x_discrete(labels = x)+
-  labs(x = "Day Type", y = "Number of Rides", title = "Rides per Day Type")
+# # TODO: FIX LABEL and touching bottom
+# dataWeekDay2 %>%
+#   ggplot(aes(Day, Count)) +
+#   geom_bar(stat = "identity", fill = "#88CCEE") +
+#   theme_bw() +
+#   scale_x_discrete(labels = x)+
+#   labs(x = "Day Type", y = "Number of Rides", title = "Rides per Day Type")
 
 # number of rides by month of year (Jan through Dec) TODO still needs to convert numbers to months
 monthsColNames = c("Month","Count")
@@ -353,6 +353,8 @@ server <- function(input, output, session) {
     
     # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
     dataHoursByDay$Count <- formatC(dataHoursByDay$Count, big.mark = ",")
+    # as.data.frame.table(dataHoursByDay)
+    # view(as.data.frame(dataHoursByDay))
     dataHoursByDay
   }))
   # ---------------------------------------------------------------------- //
