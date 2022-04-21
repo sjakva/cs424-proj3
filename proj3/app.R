@@ -171,8 +171,7 @@ ui <- dashboardPage(
         tabBox(
           title = "Chicago Community Areas Charts",
           width = 12,
-          tabPanel("Day of year", "the distribution of the number of rides by day of year (Jan 1 through Dec 31)",
-                   plotOutput("daysOfYearPlot", width = "100%")),
+          tabPanel("Day of year",    plotOutput("daysOfYearPlot", width = "100%")),
           tabPanel("Hour of day", "the distribution of the number of rides by hour of day based on start time (midnight through 11pm)"),
           tabPanel("Day of week", "the distribution of the number of rides by day of week (Monday through Sunday)"),
           tabPanel("Month", "the distribution of the number of rides by month of year (Jan through Dec)"),
@@ -274,7 +273,8 @@ server <- function(input, output, session) {
     ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Day", y = "Total number of rides") + theme_bw() +
       theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + 
-        scale_x_date(date_breaks = "5 days", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+        scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+        #           TODO: change date_breaks to 5 days if screen test fails
   })
   
 }
