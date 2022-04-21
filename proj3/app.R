@@ -152,11 +152,13 @@ dataWeekDay2 %>%
   scale_x_discrete(labels = x)+
   labs(x = "Day Type", y = "Number of Rides", title = "Rides per Day Type")
 
-# number of rides by month of year (Jan through Dec) TODO still
-hoursColNames = c("Month","Count")
-dataHoursByDay <- Taxi %>%
-  group_by(Taxi$Hour) %>% summarise(count=n())
-colnames(dataHoursByDay) = hoursColNames
+# number of rides by month of year (Jan through Dec) TODO still needs to convert numbers to months
+monthsColNames = c("Month","Count")
+dataHoursByMonth <- Taxi %>%
+  group_by(month(Taxi$Date)) %>% summarise(count=n())
+colnames(dataHoursByMonth) = monthsColNames
+view(dataHoursByMonth)
+
 #end-barchart stuff --------------------------------
 
 # --------------------------------------------------------------
@@ -300,11 +302,16 @@ server <- function(input, output, session) {
                                                         bringToFront = TRUE))
   })
   
+  
+  
+  # distribution of the number of rides by day of year (Jan 1 through Dec 31)
+  # ---------------------------------------------------------------------- //
+  #   //  Chart   //
   output$daysOfYearPlot <- renderPlot({
     # TODO: reactive title? ----------------------------------------- //
     # reactiveTitle <- paste("Number of rides by day per ", input$inputYear)
     # newDate <- dateReactive()
-    # --------------------------------------------------------------- //
+  # ---------------------------------------------------------------------- //
     
     ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Day", y = "Total number of rides") + theme_bw() +
@@ -312,8 +319,8 @@ server <- function(input, output, session) {
         scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
         #           TODO: change date_breaks to 5 days if screen test fails
   })
-  # --------
-  # Table //
+  # ---------------------------------------------------------------------- //
+  #   //  Table   //
   output$daysOfYearTable <- DT::renderDataTable(DT::datatable({
     # TODO: reactive title? ----------------------------------------- //
     # reactiveTitle <- paste("Number of rides by day per ", input$inputYear)
@@ -324,6 +331,30 @@ server <- function(input, output, session) {
     dataDaysByYear$Count <- formatC(dataDaysByYear$Count, big.mark = ",")
     dataDaysByYear
   }))
+  # ---------------------------------------------------------------------- //
+  
+  
+  
+  # distribution of the number of rides by hour of day based on start time (midnight through 11pm)
+  # ---------------------------------------------------------------------- //
+  #   //  Chart   //
+  output$daysOfYearPlot <- renderPlot({
+    
+    ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+      labs(x = "Day", y = "Total number of rides") + theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + 
+      scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+  })
+  # ---------------------------------------------------------------------- //
+  #   //  Table   //
+  output$daysOfYearTable <- DT::renderDataTable(DT::datatable({
+    
+    dataDaysByYear$Date <- format(dataDaysByYear$Date, "%b. %d")
+    dataDaysByYear$Count <- formatC(dataDaysByYear$Count, big.mark = ",")
+    dataDaysByYear
+  }))
+  # ---------------------------------------------------------------------- //
+  
   
 }
 
