@@ -122,12 +122,9 @@ view(head(boundsRead))
 daysColNames = c("Date", "Count")
 dataDaysByYear <- Taxi %>% 
                       group_by(as.Date(Taxi$Date)) %>% summarise(count=n())
-# TODO: relabel values
-# Taxi$Date <- as.Date((Taxi$Date), format="%b. %d")
 # rename columns
 colnames(dataDaysByYear) = daysColNames
 view(dataDaysByYear)
-# print(format(Taxi$Date, "%Om %d"))
 
 # --------------------------------------------------------------
 
@@ -200,22 +197,7 @@ ui <- dashboardPage(
           leafletOutput("initMap")
         )
       )
-      
-      # fluidRow(
-      #   box(
-      #     title = "Tables",
-      #     solidHeader = TRUE,
-      #     status = "warning",
-      #     width = 9, background = "yellow"
-      #   ),
-      #   box(
-      #     title = "Map",
-      #     solidHeader = TRUE,
-      #     status = "warning",
-      #     width = 3, background = "yellow",
-      #     leafletOutput("initMap")
-      #   )
-      # )
+
     ),
     tabItem(
       tabName = "about",
@@ -306,6 +288,7 @@ server <- function(input, output, session) {
     # --------------------------------------------------------------- //
     
     dataDaysByYear$Date <- format(dataDaysByYear$Date, "%b. %d")
+    dataDaysByYear$Count <- formatC(dataDaysByYear$Count, big.mark = ",")
     dataDaysByYear
   }))
   
