@@ -183,6 +183,16 @@ ui <- dashboardPage(
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("Home", tabName = "home", selected = TRUE),
       menuItem("About", tabName = "about"),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
@@ -198,43 +208,147 @@ ui <- dashboardPage(
       selectInput("compToggle", "Taxi company", c('choice 1', 'choice 2'))
     )
   ),
-  dashboardBody(tabItems(
+  dashboardBody(
+    tags$style(type = "text/css", "#initMap {height: calc(100vh - 150px) !important;}"),
+    tabItems(
     tabItem(
       tabName = "home",
       # fluidRow is a grid of 12 width, width of 4 is a 1/3, 6 is 1/2, etc
-      fluidRow(
-        tabBox(
-          title = "Chicago Community Areas Charts",
-          width = 12,
-          tabPanel("Day of year",    plotOutput("daysOfYearPlot", width = "100%")),
-          tabPanel("Hour of day",    plotOutput("hoursByDayPlot", width = "100%")),
-          tabPanel("Day of week",    plotOutput("weekDayPlot", width = "100%")),
-          tabPanel("Month",          plotOutput("monthOfYearPlot", width = "100%")),
-          tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
-          tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
-        )
-      ),
+      # fluidRow(
+      #   tabBox(
+      #     title = "Chicago Community Areas Charts",
+      #     width = 12,
+      #     tabPanel("Day of year",    plotOutput("daysOfYearPlot", width = "100%")),
+      #     tabPanel("Hour of day",    plotOutput("hoursByDayPlot", width = "100%")),
+      #     tabPanel("Day of week",    plotOutput("weekDayPlot", width = "100%")),
+      #     tabPanel("Month",          plotOutput("monthOfYearPlot", width = "100%")),
+      #     tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
+      #     tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
+      #   )
+      # ),
+      # 
+      # fluidRow(
+      #   tabBox(
+      #     title = "Chicago Community Areas Charts",
+      #     width = 9,
+      #     tabPanel("Day of year",    dataTableOutput("daysOfYearTable")),
+      #     tabPanel("Hour of day",    dataTableOutput("hoursByDayTable")),
+      #     tabPanel("Day of week",    dataTableOutput("weekDayTable")),
+      #     tabPanel("Month",          dataTableOutput("monthOfYearTable")),
+      #     tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
+      #     tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
+      #   ),
+      # 
+      #   box(
+      #     title = "Map",
+      #     solidHeader = TRUE,
+      #     status = "warning",
+      #     width = 3, background = "yellow",
+      #     leafletOutput("initMap")
+      #   )
+      # )
       
+      # TODO: reshape GUI
       fluidRow(
-        tabBox(
-          title = "Chicago Community Areas Charts",
-          width = 9,
-          tabPanel("Day of year",    dataTableOutput("daysOfYearTable")),
-          tabPanel("Hour of day",    dataTableOutput("hoursByDayTable")),
-          tabPanel("Day of week",    dataTableOutput("weekDayTable")),
-          tabPanel("Month",          dataTableOutput("monthOfYearTable")),
-          tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
-          tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
-        ),
         
-        box(
-          title = "Map",
-          solidHeader = TRUE,
-          status = "warning",
-          width = 3, background = "yellow",
-          leafletOutput("initMap")
-        )
+        # Leaflet
+        column(width = 4, offset = 0, style='padding:0px; height: 100%;',
+               box(
+                 title = "Map",
+                 solidHeader = TRUE,
+                 status = "warning",
+                 width=12, background = "yellow",
+                 leafletOutput("initMap")
+                )
+               ),
+        
+        # 6 Graphs & Tables
+        column(width = 8, offset = 0, style='padding:0px;',
+               # graph/table column 1
+               column(width = 6,
+                      fluidRow(
+                        tabBox(
+                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                          # solidHeader = TRUE, status = "warning",
+                          tabPanel("Graph", plotOutput("daysOfYearPlot", width = "100%", height = 300)),
+                          tabPanel("Table", dataTableOutput("daysOfYearTable")), width = 12,
+                        )
+                      ),
+                      fluidRow(
+                        tabBox(
+                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)", 
+                          # solidHeader = TRUE, status = "warning",
+                          tabPanel("Graph", plotOutput("hoursByDayPlot", width = "100%", height = 300)),
+                          tabPanel("Table", dataTableOutput("hoursByDayTable")), width = 12,
+                        )
+                      ),
+                      fluidRow(
+                        tabBox(
+                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                          # solidHeader = TRUE, status = "warning",
+                          tabPanel("Graph", plotOutput("weekDayPlot", width = "100%", height = 300)),
+                          tabPanel("Table", dataTableOutput("weekDayTable")), width = 12,
+                        )
+                      )
+                    ),
+               
+               # graph/table column 2
+               column(width = 6,
+                      fluidRow(
+                        tabBox(
+                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                          # solidHeader = TRUE, status = "warning",
+                          tabPanel("Graph", plotOutput("monthOfYearPlot", width = "100%", height = 300)),
+                          tabPanel("Table", dataTableOutput("monthOfYearTable")), width = 12,
+                        )
+                      ),
+                      fluidRow(
+                        tabBox(
+                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                          # solidHeader = TRUE, status = "warning"
+                          tabPanel("Graph", "graph"),
+                          tabPanel("Table", "table"), width = 12,
+                        )
+                      ),
+                      fluidRow(
+                        tabBox(
+                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                          # solidHeader = TRUE, status = "warning"
+                          tabPanel("Graph", "graph"),
+                          tabPanel("Table", "table"), width = 12,
+                        )
+                      )
+               )
+               )
       )
+      
+      # fluidRow(
+      #   tabBox(
+      #     title = "Chicago Community Areas Charts",
+      #     width = 12,
+      #     tabPanel("Day of year",    plotOutput("daysOfYearPlot", width = "100%")),
+      #     tabPanel("Hour of day",    plotOutput("hoursByDayPlot", width = "100%")),
+      #     tabPanel("Day of week",    plotOutput("weekDayPlot", width = "100%")),
+      #     tabPanel("Month",          plotOutput("monthOfYearPlot", width = "100%")),
+      #     tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
+      #     tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
+      #   )
+      # ),
+      # 
+      # fluidRow(
+      #   tabBox(
+      #     title = "Chicago Community Areas Charts",
+      #     width = 9,
+      #     tabPanel("Day of year",    dataTableOutput("daysOfYearTable")),
+      #     tabPanel("Hour of day",    dataTableOutput("hoursByDayTable")),
+      #     tabPanel("Day of week",    dataTableOutput("weekDayTable")),
+      #     tabPanel("Month",          dataTableOutput("monthOfYearTable")),
+      #     tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
+      #     tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
+      #   ),
+      #   
+      #   
+      # )
 
     ),
     tabItem(
@@ -298,7 +412,7 @@ server <- function(input, output, session) {
   
   
   output$initMap <- renderLeaflet({
-    leaflet() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 10) %>%
+    leaflet() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 12) %>%
       addProviderTiles(providers$Stamen.Terrain, options = providerTileOptions()
       ) %>% addPolygons(data = boundsRead, weight = 1.25, fillColor = "#d087e6", fillOpacity = 0.4, color ="#ffad33", opacity = 0.7,
               label = ~community, highlightOptions = highlightOptions(color = "#0f7a6c", fillOpacity = 0.8, weight = 2,
