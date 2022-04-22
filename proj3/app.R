@@ -110,14 +110,15 @@ Taxi <-
 #end-merging files together --------------------------------
 # view(head(Taxi))
 
-
 # read in boundary data from 
 #   https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6
 boundsRead = readOGR(dsn=getwd(), layer="geo_export")
 view(head(boundsRead))
 # summary(boundsRead)
 
+
 #start-barchart stuff --------------------------------
+
 # number of rides per day over the year
 daysColNames = c("Date", "Count")
 dataDaysByYear <- Taxi %>% 
@@ -132,6 +133,7 @@ dataHoursByDay <- Taxi %>%
 colnames(dataHoursByDay) = hoursColNames
 # view(dataHoursByDay)
 
+
 # number of rides by day of week (Monday through Sunday)
 dayColNames = c("Day","Count")
 x <- c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")
@@ -145,13 +147,6 @@ dataWeekDay2 <- dataWeekDay %>%
 dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = c("1","2","3","4","5","6","0"))
 # view(dataWeekDay2)
 
-# # TODO: FIX LABEL and touching bottom
-# dataWeekDay2 %>%
-#   ggplot(aes(Day, Count)) +
-#   geom_bar(stat = "identity", fill = "#88CCEE") +
-#   theme_bw() +
-#   scale_x_discrete(labels = x)+
-#   labs(x = "Day Type", y = "Number of Rides", title = "Rides per Day Type")
 
 # number of rides by month of year (Jan through Dec) TODO still needs to convert numbers to months
 monthsColNames = c("Month","Count")
@@ -162,40 +157,30 @@ colnames(dataHoursByMonth) = monthsColNames
 
 
 # number of rides by binned mileage (with an appropriate number of bins)
-
 breaks <- c(0.5,10,20,30,40,50,60,70,80,90,100)
-
 group_tags <- cut(Taxi$`Trip Miles`, 
                   breaks=breaks, 
                   include.lowest=TRUE, 
                   right=FALSE)
-summary(group_tags)# binning<-Taxi %>% mutate(rank=ntile(`Trip Miles`,4))
+group_tags <- as_tibble(group_tags)
+# summary(group_tags)# binning<-Taxi %>% mutate(rank=ntile(`Trip Miles`,4))
 # view(binning)
-#TODO fix y axis labels and ya
-ggplot(data = as_tibble(group_tags), mapping = aes(x=value)) + 
-  geom_bar(fill="bisque",color="white",alpha=0.7) + 
-  stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
-  labs(x='Miles Driven') +
-  theme_minimal() 
 
-# number of rides by binned trip time (with an appropriate number of bins) --------------
+
+# number of rides by binned trip time (with an appropriate number of bins) 
 period <- ms(Taxi$`Trip Seconds`)
-# JESSE <- cut(period, breaks="15 minutes")
 breaks <- c(60,900,1800,2700,3600,4500,5400,6300,7200,8100,9000,9900,10800,11700,12600,13500,14400,15300,16200,17100,18000)
-group_tags <- cut(Taxi$`Trip Seconds`, 
+group_tags2 <- cut(Taxi$`Trip Seconds`, 
                   breaks=breaks, 
                   include.lowest=TRUE, 
                   right=FALSE)
-ggplot(data = as_tibble(group_tags), mapping = aes(x=value)) + 
-  geom_bar(fill="bisque",color="white",alpha=0.7) + 
-  stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
-  labs(x='Duration of Ride') +
-  theme_minimal() 
+group_tags2 <- as_tibble(group_tags2)
+
 #end-barchart stuff --------------------------------
 
-# TODO: display all instead of tabs?
 
 # --------------------------------------------------------------
+
 
 
 #------------------------------------
@@ -244,42 +229,6 @@ ui <- dashboardPage(
     tabItems(
     tabItem(
       tabName = "home",
-      # fluidRow is a grid of 12 width, width of 4 is a 1/3, 6 is 1/2, etc
-      # fluidRow(
-      #   tabBox(
-      #     title = "Chicago Community Areas Charts",
-      #     width = 12,
-      #     tabPanel("Day of year",    plotOutput("daysOfYearPlot", width = "100%")),
-      #     tabPanel("Hour of day",    plotOutput("hoursByDayPlot", width = "100%")),
-      #     tabPanel("Day of week",    plotOutput("weekDayPlot", width = "100%")),
-      #     tabPanel("Month",          plotOutput("monthOfYearPlot", width = "100%")),
-      #     tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
-      #     tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
-      #   )
-      # ),
-      # 
-      # fluidRow(
-      #   tabBox(
-      #     title = "Chicago Community Areas Charts",
-      #     width = 9,
-      #     tabPanel("Day of year",    dataTableOutput("daysOfYearTable")),
-      #     tabPanel("Hour of day",    dataTableOutput("hoursByDayTable")),
-      #     tabPanel("Day of week",    dataTableOutput("weekDayTable")),
-      #     tabPanel("Month",          dataTableOutput("monthOfYearTable")),
-      #     tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
-      #     tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
-      #   ),
-      # 
-      #   box(
-      #     title = "Map",
-      #     solidHeader = TRUE,
-      #     status = "warning",
-      #     width = 3, background = "yellow",
-      #     leafletOutput("initMap")
-      #   )
-      # )
-      
-      # TODO: reshape GUI -- fix sizing?
       fluidRow(
         
         # Leaflet
@@ -299,7 +248,7 @@ ui <- dashboardPage(
                column(width = 6,
                       fluidRow(
                         tabBox(
-                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                          title="Distribution of the number of rides by day of year (Jan 1 through Dec 31)",
                           # solidHeader = TRUE, status = "warning",
                           tabPanel("Graph", plotOutput("daysOfYearPlot", width = "100%", height = 300)),
                           tabPanel("Table", dataTableOutput("daysOfYearTable")), width = 12,
@@ -307,7 +256,7 @@ ui <- dashboardPage(
                       ),
                       fluidRow(
                         tabBox(
-                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)", 
+                          title="Distribution of the number of rides by hour of day based on start time (midnight through 11pm)", 
                           # solidHeader = TRUE, status = "warning",
                           tabPanel("Graph", plotOutput("hoursByDayPlot", width = "100%", height = 300)),
                           tabPanel("Table", dataTableOutput("hoursByDayTable")), width = 12,
@@ -315,7 +264,7 @@ ui <- dashboardPage(
                       ),
                       fluidRow(
                         tabBox(
-                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                          title="Distribution of the number of rides by day of week (Monday through Sunday)",
                           # solidHeader = TRUE, status = "warning",
                           tabPanel("Graph", plotOutput("weekDayPlot", width = "100%", height = 300)),
                           tabPanel("Table", dataTableOutput("weekDayTable")), width = 12,
@@ -327,7 +276,7 @@ ui <- dashboardPage(
                column(width = 6,
                       fluidRow(
                         tabBox(
-                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                          title="Distribution of the number of rides by month of year (Jan through Dec)",
                           # solidHeader = TRUE, status = "warning",
                           tabPanel("Graph", plotOutput("monthOfYearPlot", width = "100%", height = 300)),
                           tabPanel("Table", dataTableOutput("monthOfYearTable")), width = 12,
@@ -335,18 +284,18 @@ ui <- dashboardPage(
                       ),
                       fluidRow(
                         tabBox(
-                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                          title="Distribution of the number of rides by binned mileage (with an appropriate number of bins)",
                           # solidHeader = TRUE, status = "warning"
-                          tabPanel("Graph", "graph"),
-                          tabPanel("Table", "table"), width = 12,
+                          tabPanel("Graph", plotOutput("mileagePlot", width = "100%", height = 300)),
+                          tabPanel("Table", dataTableOutput("mileageTable")), width = 12,
                         )
                       ),
                       fluidRow(
                         tabBox(
-                          title="distribution of the number of rides by day of year (Jan 1 through Dec 31)",
+                          title="Distribution of the number of rides by binned trip time (with an appropriate number of bins)",
                           # solidHeader = TRUE, status = "warning"
-                          tabPanel("Graph", "graph"),
-                          tabPanel("Table", "table"), width = 12,
+                          tabPanel("Graph", plotOutput("timePlot", width = "100%", height = 300)),
+                          tabPanel("Table", dataTableOutput("timeTable")), width = 12,
                         )
                       )
                )
@@ -414,7 +363,7 @@ server <- function(input, output, session) {
   # })
   # ----------------------------------------------------------------- //
   
-  
+
   output$initMap <- renderLeaflet({
     leaflet() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 12) %>%
       addProviderTiles(providers$Stamen.Terrain, options = providerTileOptions()
@@ -422,9 +371,9 @@ server <- function(input, output, session) {
               label = ~community, highlightOptions = highlightOptions(color = "#0f7a6c", fillOpacity = 0.8, weight = 2,
                                                         bringToFront = TRUE))
   })
-  
-  
-  
+
+
+
   # distribution of the number of rides by day of year (Jan 1 through Dec 31)
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
@@ -433,10 +382,10 @@ server <- function(input, output, session) {
     # reactiveTitle <- paste("Number of rides by day per ", input$inputYear)
     # newDate <- dateReactive()
   # ---------------------------------------------------------------------- //
-    
+
     ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Day", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + 
+      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
         scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
         #           TODO: change date_breaks to 5 days if screen test fails
   })
@@ -447,30 +396,30 @@ server <- function(input, output, session) {
     # reactiveTitle <- paste("Number of rides by day per ", input$inputYear)
     # newDate <- dateReactive()
     # --------------------------------------------------------------- //
-    
+
     dataDaysByYear$Date <- format(dataDaysByYear$Date, "%b. %d")
     dataDaysByYear$Count <- formatC(dataDaysByYear$Count, big.mark = ",")
     dataDaysByYear
   }))
   # ---------------------------------------------------------------------- //
-  
-  
-  
+
+
+
   # distribution of the number of rides by hour of day based on start time (midnight through 11pm)
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
   output$hoursByDayPlot <- renderPlot({
-    
+
     ggplot(dataHoursByDay, aes(x = Hour, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Hour", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) + 
+      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
       coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
       # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
   })
   # ---------------------------------------------------------------------- //
   #   //  Table   //
   output$hoursByDayTable <- DT::renderDataTable(DT::datatable({
-    
+
     # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
     dataHoursByDay$Count <- formatC(dataHoursByDay$Count, big.mark = ",")
     # as.data.frame.table(dataHoursByDay)
@@ -478,50 +427,113 @@ server <- function(input, output, session) {
     dataHoursByDay
   }))
   # ---------------------------------------------------------------------- //
-  
-  
-  
+
+
+
   # distribution of the number of rides by day of week (Monday through Sunday)
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
   output$weekDayPlot <- renderPlot({
-    
+
     ggplot(dataWeekDay2, aes(x = Day, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Day", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) + 
+      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
       coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
     # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
   })
   # ---------------------------------------------------------------------- //
   #   //  Table   //
   output$weekDayTable <- DT::renderDataTable(DT::datatable({
-    
+
     # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
     dataWeekDay2$Count <- formatC(dataWeekDay2$Count, big.mark = ",")
     dataWeekDay2
   }))
   # ---------------------------------------------------------------------- //
-  
-  
-  
+
+
+
   # distribution of the number of rides by month of year (Jan through Dec)
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
   output$monthOfYearPlot <- renderPlot({
-    
+
     ggplot(dataHoursByMonth, aes(x = Month, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Month", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) + 
+      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
       coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
     # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
   })
   # ---------------------------------------------------------------------- //
   #   //  Table   //
   output$monthOfYearTable <- DT::renderDataTable(DT::datatable({
-    
+
     # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
     dataHoursByMonth$Count <- formatC(dataHoursByMonth$Count, big.mark = ",")
     dataHoursByMonth
+  }))
+  # ---------------------------------------------------------------------- //
+
+
+
+  # distribution of the number of rides  to / from this community area by binned mileage
+  # ---------------------------------------------------------------------- //
+  #   //  Chart   //
+  output$mileagePlot <- renderPlot({
+
+    # ggplot(dataHoursByMonth, aes(x = Month, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+    #   labs(x = "Month", y = "Total number of rides") + theme_bw() +
+    #   theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
+    #   coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
+    # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+
+    #TODO fix y axis labels and ya
+    ggplot(data = group_tags, mapping = aes(x=value)) +
+      geom_bar(fill="bisque",color="white",alpha=0.7) +
+      stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
+      labs(x='Miles Driven') +
+      theme_minimal()
+  })
+  # ---------------------------------------------------------------------- //
+  #   //  Table   //
+  output$mileageTable <- DT::renderDataTable(DT::datatable({
+
+    # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
+    # dataHoursByMonth$Count <- formatC(dataHoursByMonth$Count, big.mark = ",")
+    # dataHoursByMonth
+    # as_tibble(group_tags)
+    group_tags
+  }))
+  # ---------------------------------------------------------------------- //
+
+
+
+  # distribution of the number of rides  to / from this community area by binned trip time
+  # ---------------------------------------------------------------------- //
+  #   //  Chart   //
+  output$timePlot <- renderPlot({
+
+    # ggplot(dataHoursByMonth, aes(x = Month, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+    #   labs(x = "Month", y = "Total number of rides") + theme_bw() +
+    #   theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
+    #   coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
+    # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+
+    ggplot(data = group_tags2, mapping = aes(x=value)) +
+      geom_bar(fill="bisque",color="white",alpha=0.7) +
+      stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags2))), vjust=-0.5) + #i dont know what this line does
+      labs(x='Duration of Ride') +
+      theme_minimal()
+  })
+  # ---------------------------------------------------------------------- //
+  #   //  Table   //
+  output$timeTable <- DT::renderDataTable(DT::datatable({
+
+    # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
+    # dataHoursByMonth$Count <- formatC(dataHoursByMonth$Count, big.mark = ",")
+    # dataHoursByMonth
+    # as_tibble(group_tags2)
+    group_tags2
   }))
   # ---------------------------------------------------------------------- //
   
