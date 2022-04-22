@@ -108,7 +108,7 @@ Taxi <-
   list.files(pattern = "*.csv") %>% 
   map_df(~fread(.))
 #end-merging files together --------------------------------
-view(head(Taxi))
+# view(head(Taxi))
 
 
 # read in boundary data from 
@@ -130,7 +130,7 @@ hoursColNames = c("Hour","Count")
 dataHoursByDay <- Taxi %>%
   group_by(Taxi$Hour) %>% summarise(count=n())
 colnames(dataHoursByDay) = hoursColNames
-view(dataHoursByDay)
+# view(dataHoursByDay)
 
 # number of rides by day of week (Monday through Sunday)
 dayColNames = c("Day","Count")
@@ -143,7 +143,7 @@ colnames(dataWeekDay) = dayColNames
 dataWeekDay2 <- dataWeekDay %>%
   slice(match(y, dataWeekDay$Day))
 dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = c("1","2","3","4","5","6","0"))
-view(dataWeekDay2)
+# view(dataWeekDay2)
 
 # # TODO: FIX LABEL and touching bottom
 # dataWeekDay2 %>%
@@ -158,13 +158,12 @@ monthsColNames = c("Month","Count")
 dataHoursByMonth <- Taxi %>%
   group_by(month(Taxi$Date)) %>% summarise(count=n())
 colnames(dataHoursByMonth) = monthsColNames
-view(dataHoursByMonth)
+# view(dataHoursByMonth)
 
 
 # number of rides by binned mileage (with an appropriate number of bins)
 
 breaks <- c(0.5,10,20,30,40,50,60,70,80,90,100)
-tags <- c("[0.5-20)","[20-40)", "[40-60)", "[60-80)", "[80-100)")
 
 group_tags <- cut(Taxi$`Trip Miles`, 
                   breaks=breaks, 
