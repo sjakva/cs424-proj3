@@ -10,9 +10,6 @@
 # --------------------------------------------------------------
 # # install.packages("shiny","tidyverse","shinydashboard","lubridate", "sf", "rgdal")
 install.packages("measurements")
-options(repos='http://cran.rstudio.com/')
-
-install.packages('measurements', dependencies=TRUE, repos='http://cran.rstudio.com/')
 
 library(shiny)
 library(lubridate)
@@ -182,7 +179,7 @@ group_tags2 <- cut(Taxi$`Trip Seconds`,
                   right=FALSE)
 group_tags2 <- as_tibble(group_tags2)
 # convert.distance(x, from = c("nm", "km", "mi"), to = c("km", "nm", "mi"))
-kmConvert <- convert.distance(Taxi$`Trip Miles`,from = "mi", to = "km")
+# kmConvert <- convert.distance(Taxi$`Trip Miles`,from = "mi", to = "km")
 
 #end-barchart stuff --------------------------------
 
