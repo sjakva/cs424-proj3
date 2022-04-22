@@ -160,6 +160,38 @@ dataHoursByMonth <- Taxi %>%
 colnames(dataHoursByMonth) = monthsColNames
 view(dataHoursByMonth)
 
+
+# number of rides by binned mileage (with an appropriate number of bins)
+
+breaks <- c(0.5,10,20,30,40,50,60,70,80,90,100)
+tags <- c("[0.5-20)","[20-40)", "[40-60)", "[60-80)", "[80-100)")
+
+group_tags <- cut(Taxi$`Trip Miles`, 
+                  breaks=breaks, 
+                  include.lowest=TRUE, 
+                  right=FALSE)
+summary(group_tags)# binning<-Taxi %>% mutate(rank=ntile(`Trip Miles`,4))
+# view(binning)
+#TODO fix y axis labels and ya
+ggplot(data = as_tibble(group_tags), mapping = aes(x=value)) + 
+  geom_bar(fill="bisque",color="white",alpha=0.7) + 
+  stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
+  labs(x='Miles Driven') +
+  theme_minimal() 
+
+# number of rides by binned trip time (with an appropriate number of bins) --------------
+period <- ms(Taxi$`Trip Seconds`)
+# JESSE <- cut(period, breaks="15 minutes")
+breaks <- c(60,900,1800,2700,3600,4500,5400,6300,7200,8100,9000,9900,10800,11700,12600,13500,14400,15300,16200,17100,18000)
+group_tags <- cut(Taxi$`Trip Seconds`, 
+                  breaks=breaks, 
+                  include.lowest=TRUE, 
+                  right=FALSE)
+ggplot(data = as_tibble(group_tags), mapping = aes(x=value)) + 
+  geom_bar(fill="bisque",color="white",alpha=0.7) + 
+  stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
+  labs(x='Duration of Ride') +
+  theme_minimal() 
 #end-barchart stuff --------------------------------
 
 # TODO: display all instead of tabs?
