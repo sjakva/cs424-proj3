@@ -9,6 +9,11 @@
 
 # --------------------------------------------------------------
 # # install.packages("shiny","tidyverse","shinydashboard","lubridate", "sf", "rgdal")
+install.packages("measurements")
+options(repos='http://cran.rstudio.com/')
+
+install.packages('measurements', dependencies=TRUE, repos='http://cran.rstudio.com/')
+
 library(shiny)
 library(lubridate)
 library(ggplot2)
@@ -22,6 +27,7 @@ library(dplyr)
 library(sf)
 library(rgdal)
 library(scales)
+library(measurements)
 
 monthsAbbr <- c(
   "Jan.",
@@ -113,7 +119,7 @@ Taxi <-
 # read in boundary data from 
 #   https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6
 boundsRead = readOGR(dsn=getwd(), layer="geo_export")
-view(head(boundsRead))
+# view(head(boundsRead))
 # summary(boundsRead)
 
 
@@ -169,12 +175,14 @@ group_tags <- as_tibble(group_tags)
 
 # number of rides by binned trip time (with an appropriate number of bins) 
 period <- ms(Taxi$`Trip Seconds`)
-breaks <- c(60,900,1800,2700,3600,4500,5400,6300,7200,8100,9000,9900,10800,11700,12600,13500,14400,15300,16200,17100,18000)
+breaks <- c(60,1800,3600,5400,7200,9000,10800,12600,14400,16200,18000)
 group_tags2 <- cut(Taxi$`Trip Seconds`, 
                   breaks=breaks, 
                   include.lowest=TRUE, 
                   right=FALSE)
 group_tags2 <- as_tibble(group_tags2)
+# convert.distance(x, from = c("nm", "km", "mi"), to = c("km", "nm", "mi"))
+kmConvert <- convert.distance(Taxi$`Trip Miles`,from = "mi", to = "km")
 
 #end-barchart stuff --------------------------------
 
@@ -413,7 +421,8 @@ server <- function(input, output, session) {
     ggplot(dataHoursByDay, aes(x = Hour, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Hour", y = "Total number of rides") + theme_bw() +
       theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
-      coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
+      coord_cartesian(expand = FALSE) +#+ scale_x_discrete(labels=c(0:23))
+      scale_y_continuous(labels = scales::comma)
       # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
   })
   # ---------------------------------------------------------------------- //
@@ -489,9 +498,11 @@ server <- function(input, output, session) {
 
     #TODO fix y axis labels and ya
     ggplot(data = group_tags, mapping = aes(x=value)) +
-      geom_bar(fill="bisque",color="white",alpha=0.7) +
-      stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
+      geom_bar(fill="#ffad33",color="white") +
+      # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
       labs(x='Miles Driven') +
+      # scale_y_log10(labels = trans_format("log10", math_format(10^.x))) + #testing shit out
+      scale_y_log10(labels = scales::comma) + 
       theme_minimal()
   })
   # ---------------------------------------------------------------------- //
@@ -520,9 +531,11 @@ server <- function(input, output, session) {
     # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
 
     ggplot(data = group_tags2, mapping = aes(x=value)) +
-      geom_bar(fill="bisque",color="white",alpha=0.7) +
-      stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags2))), vjust=-0.5) + #i dont know what this line does
+      geom_bar(fill="#ffad33",color="white") +
+      # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags2))), vjust=-0.5) + #i dont know what this line does
       labs(x='Duration of Ride') +
+      # scale_y_log10(labels = trans_format("log10", math_format(10^.x))) + #testing stuff with this line
+      scale_y_log10(labels = scales::comma) + 
       theme_minimal()
   })
   # ---------------------------------------------------------------------- //
