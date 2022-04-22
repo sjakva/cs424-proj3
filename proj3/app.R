@@ -248,7 +248,7 @@ ui <- dashboardPage(
       #   )
       # )
       
-      # TODO: reshape GUI
+      # TODO: reshape GUI -- fix sizing?
       fluidRow(
         
         # Leaflet
@@ -322,33 +322,6 @@ ui <- dashboardPage(
                )
       )
       
-      # fluidRow(
-      #   tabBox(
-      #     title = "Chicago Community Areas Charts",
-      #     width = 12,
-      #     tabPanel("Day of year",    plotOutput("daysOfYearPlot", width = "100%")),
-      #     tabPanel("Hour of day",    plotOutput("hoursByDayPlot", width = "100%")),
-      #     tabPanel("Day of week",    plotOutput("weekDayPlot", width = "100%")),
-      #     tabPanel("Month",          plotOutput("monthOfYearPlot", width = "100%")),
-      #     tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
-      #     tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
-      #   )
-      # ),
-      # 
-      # fluidRow(
-      #   tabBox(
-      #     title = "Chicago Community Areas Charts",
-      #     width = 9,
-      #     tabPanel("Day of year",    dataTableOutput("daysOfYearTable")),
-      #     tabPanel("Hour of day",    dataTableOutput("hoursByDayTable")),
-      #     tabPanel("Day of week",    dataTableOutput("weekDayTable")),
-      #     tabPanel("Month",          dataTableOutput("monthOfYearTable")),
-      #     tabPanel("Mileage", "the distribution of the number of rides by binned mileage (with an appropriate number of bins)"),
-      #     tabPanel("Trip time", "the distribution of the number of rides by binned trip time (with an appropriate number of bins)")
-      #   ),
-      #   
-      #   
-      # )
 
     ),
     tabItem(
