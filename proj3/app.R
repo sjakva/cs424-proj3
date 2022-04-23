@@ -419,10 +419,12 @@ server <- function(input, output, session) {
   
 
   output$initMap <- renderLeaflet({
+    borders
+    
     pal <- colorNumeric("plasma", NULL)
     
     leaflet(borders) %>%
-      addTiles() %>%
+      addTiles() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 13) %>%
       addPolygons(color = "black", weight = 1, smoothFactor = 0.5,
                   opacity = 1.0, fillOpacity = 0.5,
                   fillColor = ~pal(Pickup),
