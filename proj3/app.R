@@ -208,11 +208,23 @@ view(fromList)
 
 borders = geojson_read("data.geojson", what = "sp")
 borders$area_numbe = as.numeric(borders$area_numbe)
+borders$Dropoff = as.numeric(borders$area_num_1)
+borders$Pickup = as.numeric(borders$area_num_1)
+
 borders = borders[order(borders$area_numbe),]
-view(borders)
-borders$Dropoff = unlist(fromList,use.names = FALSE)
-borders$Pickup = unlist(pickupList,use.names = FALSE)
-print(typeof(borders))
+
+for (x in 1:length(fromList))
+{
+  borders$Dropoff[x] = fromList[x]
+}
+for (x in 1:length(pickupList))
+{
+  borders$Pickup[x] = pickupList[x]
+}
+# view(borders)
+# borders$Dropoff = unlist(fromList,use.names = FALSE)
+# borders$Pickup = unlist(pickupList,use.names = FALSE)
+# print(typeof(borders))
 
 #end-heatmap sussy
 # --------------------------------------------------
@@ -413,10 +425,10 @@ server <- function(input, output, session) {
       addTiles() %>%
       addPolygons(color = "black", weight = 1, smoothFactor = 0.5,
                   opacity = 1.0, fillOpacity = 0.5,
-                  fillColor = ~pal(Dropoff),
+                  fillColor = ~pal(Pickup),
                   highlightOptions = highlightOptions(color = "white", weight = 2,
                                                       bringToFront = TRUE), label = ~community) %>%
-      addLegend(pal = pal, values = ~Dropoff, opacity = 1.0,
+      addLegend(pal = pal, values = ~Pickup, opacity = 1.0,
                 labFormat = labelFormat(transform = function(x) round(x)))
   })
 
