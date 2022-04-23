@@ -419,7 +419,7 @@ server <- function(input, output, session) {
   
 
   output$initMap <- renderLeaflet({
-    pal <- colorNumeric("viridis", NULL)
+    pal <- colorNumeric("plasma", NULL)
     
     leaflet(borders) %>%
       addTiles() %>%
@@ -427,8 +427,9 @@ server <- function(input, output, session) {
                   opacity = 1.0, fillOpacity = 0.5,
                   fillColor = ~pal(Pickup),
                   highlightOptions = highlightOptions(color = "white", weight = 2,
-                                                      bringToFront = TRUE), label = ~community) %>%
-      addLegend(pal = pal, values = ~Pickup, opacity = 1.0,
+                                                      bringToFront = TRUE), label = ~paste0(community, ": ", formatC(Pickup, big.mark = ","),"%")
+      ) %>%
+      addLegend(pal = pal, values = ~Pickup, opacity = 3.0,
                 labFormat = labelFormat(transform = function(x) round(x)))
   })
 
