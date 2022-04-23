@@ -203,6 +203,10 @@ fromList <- fromTable / sum(fromTable) * 100
 view(fromList)
 
 borders = geojson_read("data.geojson", what = "sp")
+
+namesAlpha <-borders[order(borders$community),]
+view(namesAlpha)
+
 borders$area_numbe = as.numeric(borders$area_numbe)
 borders$Dropoff = as.numeric(borders$area_num_1)
 borders$Pickup = as.numeric(borders$area_num_1)
@@ -268,7 +272,7 @@ ui <- dashboardPage(
       selectInput("timeToggle", "Time format", c('12 hour (AM/PM)', '24 hour'), selected = '24 hour'),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      selectInput("commToggle", "Community Area", c('choice 1', 'choice 2')),
+      selectInput("commToggle", "Community Area", namesAlpha$community),
       selectInput("destToggle", "From/To", c('Starting from', 'Ending to')),
       selectInput("compToggle", "Taxi company", c('choice 1', 'choice 2'))
     )
@@ -385,6 +389,40 @@ ui <- dashboardPage(
 # Define server logic
 #   session as a param allows access to information and functionality relating to the session
 server <- function(input, output, session) {
+  
+  communitySubsetReactive <-
+    reactive({
+      userCommunity = input$commToggle
+      
+      userCommunity <- mapvalues(userCommunity, namesAlpha$community, namesAlpha$area_numbe)
+      # view(userCommunity)
+      communitySub = subset(Taxi, Taxi$`Pickup Community Area` == userCommunity)
+      temp2 = anti_join(Taxi, communitySub, "Pickup Community Area")
+      # view(temp2)
+      temp3 = subset(temp2, temp2$`Dropoff Community Area` == userCommunity)
+      
+      # view(rbind(communitySub, temp3))
+      # print(userCommunity)
+    })
+  
+  communityNumberReactive <-
+    reactive({
+      userCommunity = input$commToggle
+      
+      userCommunity <- mapvalues(userCommunity, namesAlpha$community, namesAlpha$area_numbe)
+    })
+  
+  destToggleReactive <-
+    reactive({
+      FromTo = input$destToggle
+      FromTo
+    })
+  observeEvent(input$initMap_shape_click,{
+    p <- input$initMap_shape_click
+    print(p$id)
+    communitySubsetReactive
+  })
+  
   unitUsed <- reactive({
     if (input$unitToggle == 'Miles') {
       group_tags    
@@ -448,13 +486,48 @@ server <- function(input, output, session) {
     # TODO: reactive title? ----------------------------------------- //
     # reactiveTitle <- paste("Number of rides by day per ", input$inputYear)
     # newDate <- dateReactive()
-  # ---------------------------------------------------------------------- //
-
-    ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
-      labs(x = "Day", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    # ---------------------------------------------------------------------- //
+    
+    # userCommunity = input$commToggle
+    # 
+    # userCommunity <- mapvalues(userCommunity, namesAlpha$community, namesAlpha$area_numbe)
+    
+    newSubset <- communitySubsetReactive()
+    commTog <- destToggleReactive() 
+    commNum <- communityNumberReactive()
+    
+    daysColNames = c("Date", "Count")
+    # 'Starting from', 'Ending to'
+    if(commTog == 'Starting from')
+    {
+      dataDaysByYear <- newSubset %>% 
+        group_by(as.Date(newSubset$Date)) %>% dplyr::summarise(count=n())
+      
+      dataDaysByYear <- filter(dataDaysByYear, "Pickup Community Area" == commNum)
+      colnames(dataDaysByYear) = daysColNames
+      # Taxi$`Pickup Community Area`
+      
+      ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+        labs(x = "Day", y = "Total number of rides") + theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
         scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
-        #           TODO: change date_breaks to 5 days if screen test fails
+      #           TODO: change date_breaks to 5 days if screen test fails
+    }
+    else
+    {
+      dataDaysByYear <- newSubset %>% 
+        group_by(as.Date(newSubset$Date)) %>% dplyr::summarise(count=n())
+      
+      dataDaysByYear <- filter(dataDaysByYear, "Dropoff Community Area" == commNum)
+      colnames(dataDaysByYear) = daysColNames
+      
+      
+      ggplot(dataDaysByYear, aes(x = Date, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+        labs(x = "Day", y = "Total number of rides") + theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+        scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+      #           TODO: change date_breaks to 5 days if screen test fails
+    }
   })
   # ---------------------------------------------------------------------- //
   #   //  Table   //
