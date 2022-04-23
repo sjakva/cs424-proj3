@@ -28,6 +28,7 @@ library(dplyr)
 library(geojsonio)
 
 
+# #Start-documentation for cleaning data -------------------------------------/
 #   You will only need a subset of the 23 columns in the data 
 #   3.  Trip Start Timestamp    (string -> date and time)
 #   5.  Trip Seconds            (int)
@@ -35,21 +36,17 @@ library(geojsonio)
 #   9.  Pickup Community Area   (int)
 #   10. Drop-off community Area (int)
 #   17. Company                 (string)
-# list of needed columns
-col_names <- c(
-  "Trip Start Timestamp",
-  "Trip Seconds", 
-  "Trip Miles", 
-  "Pickup Community Area", 
-  "Dropoff Community Area", 
-  "Company"
-  )
-
-# TaxiSelect <- fread("./Taxi_Trips_-_2019.tsv", 
-#           select = col_names,
-#           nrows = 10000)
-
-# #Start-documentation for cleaning data -------------------------------------/
+#
+#
+# # list of needed columns
+# col_names <- c(
+#   "Trip Start Timestamp",
+#   "Trip Seconds", 
+#   "Trip Miles", 
+#   "Pickup Community Area", 
+#   "Dropoff Community Area", 
+#   "Company"
+# )
 
 #   https://data.cityofchicago.org/Transportation/Taxi-Trips-2019/h4cq-z3dy
 # Go two directories out project directory for tsv file
@@ -147,8 +144,6 @@ colnames(dataHoursByMonth) = monthsColNames
 # view(dataHoursByMonth)
 
 
-
-# TODO: replace 'Trip Miles' with interactive miles/km var
 # number of rides by binned mileage (with an appropriate number of bins)
 breaks <- c(0.5,10,20,30,40,50,60,70,80,90,100)
 group_tags <- cut(Taxi$`Trip Miles`, 
@@ -183,10 +178,11 @@ group_tags2 <- cut(Taxi$`Trip Seconds`,
 group_tags2 <- as_tibble(group_tags2)
 
 
-
 #end-barchart stuff --------------------------------
 
+
 # view(head(Taxi))
+
 
 #begin-heatmap 
 # --------------------------------------------------
@@ -229,10 +225,6 @@ for (x in 1:length(pickupList))
 
 
 
-
-
-
-
 #dashboard stuff
 #------------------------------------
 ui <- dashboardPage(
@@ -243,33 +235,37 @@ ui <- dashboardPage(
     collapsed = FALSE,
     sidebarMenu(
       id = "tabs",
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      
       menuItem("Home", tabName = "home", selected = TRUE),
       menuItem("About", tabName = "about"),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
+      
+      
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      menuItem("", tabName = "c", icon = NULL),
+      
       selectInput("unitToggle", "Miles or Kilometers", c('Kilometers', 'Miles'), selected = 'Miles'),
       selectInput("timeToggle", "Time format", c('12 hour (AM/PM)', '24 hour'), selected = '24 hour'),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       selectInput("commToggle", "Community Area", namesAlpha$community),
       selectInput("destToggle", "From/To", c('Starting from', 'Ending to')),
       selectInput("compToggle", "Taxi company", c('choice 1', 'choice 2'))
