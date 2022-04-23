@@ -508,13 +508,38 @@ server <- function(input, output, session) {
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
   output$hoursByDayPlot <- renderPlot({
-
-    ggplot(dataHoursByDay, aes(x = Hour, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
-      labs(x = "Hour", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
-      coord_cartesian(expand = FALSE) +#+ scale_x_discrete(labels=c(0:23))
-      scale_y_continuous(labels = scales::comma)
-      # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+    
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
+    commTog <- destToggleReactive() 
+    
+    hoursColNames = c("Hour","Count")
+    
+    if(commTog == 'Starting from')
+    {
+      dataHoursByDay <- newPSubset %>%
+        group_by(newPSubset$Hour) %>% dplyr::summarise(count=n())
+      colnames(dataHoursByDay) = hoursColNames
+      
+      ggplot(dataHoursByDay, aes(x = Hour, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+        labs(x = "Hour", y = "Total number of rides") + theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
+        coord_cartesian(expand = FALSE) +#+ scale_x_discrete(labels=c(0:23))
+        scale_y_continuous(labels = scales::comma)
+      
+    }# scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+    else
+    {
+      dataHoursByDay <- newDSubset %>%
+        group_by(newDSubset$Hour) %>% dplyr::summarise(count=n())
+      colnames(dataHoursByDay) = hoursColNames
+      
+      ggplot(dataHoursByDay, aes(x = Hour, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+        labs(x = "Hour", y = "Total number of rides") + theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
+        coord_cartesian(expand = FALSE) +#+ scale_x_discrete(labels=c(0:23))
+        scale_y_continuous(labels = scales::comma)
+    }
   })
   # ---------------------------------------------------------------------- //
   #   //  Table   //
@@ -534,12 +559,43 @@ server <- function(input, output, session) {
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
   output$weekDayPlot <- renderPlot({
-
-    ggplot(dataWeekDay2, aes(x = Day, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
-      labs(x = "Day", y = "Total number of rides") + theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
-      coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
-    # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+    
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
+    commTog <- destToggleReactive() 
+    
+    dayColNames = c("Day","Count")
+    x <- c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")
+    y <-c("1","2","3","4","5","6","0")
+    
+    if(commTog == 'Starting from')
+    {
+      dataWeekDay <- newPSubset %>%
+        group_by(as.POSIXlt(newPSubset$Date)$wday) %>% dplyr::summarise(count=n())
+      colnames(dataWeekDay) = dayColNames
+      
+      dataWeekDay2 <- dataWeekDay %>%
+        slice(match(y, dataWeekDay$Day))
+      dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = y)
+      ggplot(dataWeekDay2, aes(x = Day, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+        labs(x = "Day", y = "Total number of rides") + theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
+        coord_cartesian(expand = FALSE)
+    }
+    else
+    {
+      dataWeekDay <- newDSubset %>%
+        group_by(as.POSIXlt(newDSubset$Date)$wday) %>% dplyr::summarise(count=n())
+      colnames(dataWeekDay) = dayColNames
+      
+      dataWeekDay2 <- dataWeekDay %>%
+        slice(match(y, dataWeekDay$Day))
+      dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = y)
+      ggplot(dataWeekDay2, aes(x = Day, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+        labs(x = "Day", y = "Total number of rides") + theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
+        coord_cartesian(expand = FALSE)
+    }
   })
   # ---------------------------------------------------------------------- //
   #   //  Table   //
@@ -557,11 +613,31 @@ server <- function(input, output, session) {
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
   output$monthOfYearPlot <- renderPlot({
-
+    
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
+    commTog <- destToggleReactive() 
+    
+    monthsColNames = c("Month","Count")
+    if(commTog == 'Starting from')
+    {
+      dataHoursByMonth <- newPSubset %>%
+        group_by(month(newPSubset$Date)) %>% dplyr::summarise(count=n())
+      colnames(dataHoursByMonth) = monthsColNames 
+    }
+    else
+    {
+      dataHoursByMonth <- newDSubset %>%
+        group_by(month(newDSubset$Date)) %>% dplyr::summarise(count=n())
+      colnames(dataHoursByMonth) = monthsColNames 
+    }
+    
     ggplot(dataHoursByMonth, aes(x = Month, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Month", y = "Total number of rides") + theme_bw() +
       theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
-      coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
+      coord_cartesian(expand = FALSE)
+    
+    #+ scale_x_discrete(labels=c(0:23))
     # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
   })
   # ---------------------------------------------------------------------- //
