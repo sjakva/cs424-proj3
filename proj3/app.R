@@ -30,8 +30,6 @@ library(dplyr)
 library(geojsonio)
 
 
-monthsAbbr <- c("Jan.","Feb.","Mar.","Apr.","May.","Jun.","Jul.","Aug.","Sep.","Oct.","Nov.","Dec.")
-
 #   You will only need a subset of the 23 columns in the data 
 #   3.  Trip Start Timestamp    (string -> date and time)
 #   5.  Trip Seconds            (int)
@@ -139,7 +137,7 @@ colnames(dataWeekDay) = dayColNames
 
 dataWeekDay2 <- dataWeekDay %>%
   slice(match(y, dataWeekDay$Day))
-dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = c("1","2","3","4","5","6","0"))
+dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = y)
 # view(dataWeekDay2)
 
 
@@ -151,6 +149,7 @@ colnames(dataHoursByMonth) = monthsColNames
 # view(dataHoursByMonth)
 
 
+# TODO: replace 'Trip Miles' with interactive miles/km var
 # number of rides by binned mileage (with an appropriate number of bins)
 breaks <- c(0.5,10,20,30,40,50,60,70,80,90,100)
 group_tags <- cut(Taxi$`Trip Miles`, 
@@ -158,7 +157,6 @@ group_tags <- cut(Taxi$`Trip Miles`,
                   include.lowest=TRUE, 
                   right=FALSE)
 group_tags <- as_tibble(group_tags)
-# summary(group_tags)# binning<-Taxi %>% mutate(rank=ntile(`Trip Miles`,4))
 # view(binning)
 
 
@@ -186,6 +184,8 @@ ggplot(data = group_tagskm, mapping = aes(x=value)) +
   theme_minimal()
 
 #end-barchart stuff --------------------------------
+
+# view(head(Taxi))
 
 #begin-heatmap sussy
 # --------------------------------------------------
@@ -376,11 +376,19 @@ ui <- dashboardPage(
   
 )
 
+
 #server logic
 #------------------------------------
 # Define server logic
 #   session as a param allows access to information and functionality relating to the session
 server <- function(input, output, session) {
+  unitUsed <- reactive({
+    if (input$unitToggle == 'Miles') {
+      unitUsed <- Taxi$`Trip Miles`
+    } else {
+      unitUsed <- Taxi$`km`
+    }
+  })
   # TODO: implement reactive date ----------------------------------- //
   # # changes dataset based on day
   # dateReactive <-
