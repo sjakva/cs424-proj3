@@ -11,7 +11,7 @@
 # # install.packages("shiny","tidyverse","shinydashboard","lubridate", "sf", "rgdal")
 # install.packages("measurements")
 # install.packages("udunits2")
-
+# install.packages("geojsonio")
 library(shiny)
 library(lubridate)
 library(ggplot2)
@@ -27,22 +27,10 @@ library(scales)
 library(measurements)
 library(plyr)
 library(dplyr)
+library(geojsonio)
 
 
-monthsAbbr <- c(
-  "Jan.",
-  "Feb.",
-  "Mar.",
-  "Apr.",
-  "May.",
-  "Jun.",
-  "Jul.",
-  "Aug.",
-  "Sep.",
-  "Oct.",
-  "Nov.",
-  "Dec."
-)
+monthsAbbr <- c("Jan.","Feb.","Mar.","Apr.","May.","Jun.","Jul.","Aug.","Sep.","Oct.","Nov.","Dec.")
 
 #   You will only need a subset of the 23 columns in the data 
 #   3.  Trip Start Timestamp    (string -> date and time)
@@ -71,12 +59,12 @@ col_names <- c(
 # Go two directories out project directory for tsv file
 # TaxiSelect <- fread("../../Taxi_Trips_-_2019.tsv",
 #                     select = col_names)
-
-# #   filter out the rest of the data to cut it to 300 mb
-# # 1) all trips less than 0.5 miles, 2) more than 100 miles, 
-# # 3) less than 60 seconds, 4) greater than 5 hours, 
-# # 5) all trips that either start/end outside of a Chicago community
 # 
+# # #   filter out the rest of the data to cut it to 300 mb
+# # # 1) all trips less than 0.5 miles, 2) more than 100 miles, 
+# # # 3) less than 60 seconds, 4) greater than 5 hours, 
+# # # 5) all trips that either start/end outside of a Chicago community
+# # 
 # # 1) all trips less than 0.5 miles
 # TaxiSelect <- TaxiSelect[!TaxiSelect$'Trip Miles' < 0.5]
 # # 2) more than 100 miles
@@ -88,8 +76,9 @@ col_names <- c(
 # # 5) drop NA values (trips outside Chicago community)
 # TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Pickup Community Area`)]
 # TaxiSelect <- TaxiSelect[!is.na(TaxiSelect$`Dropoff Community Area`)]
-# 
-# # view(unique)
+# # 
+# unique <- unique(TaxiSelect$)
+# view(unique)
 # valMap = c(1:55)
 # #use integers to denote different companies in order to reduce file size
 # TaxiSelect$Company = mapvalues(TaxiSelect$Company, unique, valMap)
@@ -205,8 +194,33 @@ ggplot(data = group_tagskm, mapping = aes(x=value)) +
 # view(deez)
 #end-barchart stuff --------------------------------
 
+#begin-heatmap sussy
+# --------------------------------------------------
+# pickupList <- list()
+pickupTable <- table(Taxi$`Pickup Community Area`)
+pickupList <- pickupTable / sum(pickupTable) * 100
+view(pickupList)
 
-# --------------------------------------------------------------
+# fromList = list()
+fromTable <- table(Taxi$`Dropoff Community Area`)
+fromList <- fromTable / sum(fromTable) * 100
+view(fromList)
+
+borders = geojson_read("data.geojson", what = "sp")
+borders$area_numbe = as.numeric(borders$area_numbe)
+borders = borders[order(borders$area_numbe),]
+view(borders)
+borders$Dropoff = unlist(fromList,use.names = FALSE)
+borders$Pickup = unlist(pickupList,use.names = FALSE)
+print(typeof(borders))
+
+#end-heatmap sussy
+# --------------------------------------------------
+
+
+
+
+
 
 
 #dashboard stuff
@@ -393,11 +407,17 @@ server <- function(input, output, session) {
   
 
   output$initMap <- renderLeaflet({
-    leaflet() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 12) %>%
-      addProviderTiles(providers$Stamen.Terrain, options = providerTileOptions()
-      ) %>% addPolygons(data = boundsRead, weight = 1.25, fillColor = "#d087e6", fillOpacity = 0.4, color ="#ffad33", opacity = 0.7,
-              label = ~community, highlightOptions = highlightOptions(color = "#0f7a6c", fillOpacity = 0.8, weight = 2,
-                                                        bringToFront = TRUE))
+    pal <- colorNumeric("viridis", NULL)
+    
+    leaflet(borders) %>%
+      addTiles() %>%
+      addPolygons(color = "black", weight = 1, smoothFactor = 0.5,
+                  opacity = 1.0, fillOpacity = 0.5,
+                  fillColor = ~pal(Dropoff),
+                  highlightOptions = highlightOptions(color = "white", weight = 2,
+                                                      bringToFront = TRUE), label = ~community) %>%
+      addLegend(pal = pal, values = ~Dropoff, opacity = 1.0,
+                labFormat = labelFormat(transform = function(x) round(x)))
   })
 
 
