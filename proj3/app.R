@@ -195,17 +195,17 @@ group_tags2 <- as_tibble(group_tags2)
 # pickupList <- list()
 pickupTable <- table(Taxi$`Pickup Community Area`)
 pickupList <- pickupTable / sum(pickupTable) * 100
-view(pickupList)
+# view(pickupList)
 
 # fromList = list()
 fromTable <- table(Taxi$`Dropoff Community Area`)
 fromList <- fromTable / sum(fromTable) * 100
-view(fromList)
+# view(fromList)
 
 borders = geojson_read("data.geojson", what = "sp")
 
 namesAlpha <-borders[order(borders$community),]
-view(namesAlpha)
+# view(namesAlpha)
 
 borders$area_numbe = as.numeric(borders$area_numbe)
 borders$Dropoff = as.numeric(borders$area_num_1)
@@ -390,26 +390,23 @@ ui <- dashboardPage(
 #   session as a param allows access to information and functionality relating to the session
 server <- function(input, output, session) {
   
-  communitySubsetReactive <-
+  communityPickupSubsetReactive <-
     reactive({
       userCommunity = input$commToggle
       
       userCommunity <- mapvalues(userCommunity, namesAlpha$community, namesAlpha$area_numbe)
-      # view(userCommunity)
-      communitySub = subset(Taxi, Taxi$`Pickup Community Area` == userCommunity)
-      temp2 = anti_join(Taxi, communitySub, "Pickup Community Area")
-      # view(temp2)
-      temp3 = subset(temp2, temp2$`Dropoff Community Area` == userCommunity)
-      
-      # view(rbind(communitySub, temp3))
-      # print(userCommunity)
+      communitySubP = subset(Taxi, Taxi$`Pickup Community Area` == userCommunity)
+      communitySubP
+
     })
   
-  communityNumberReactive <-
+  communityDropoffSubsetReactive <-
     reactive({
       userCommunity = input$commToggle
       
       userCommunity <- mapvalues(userCommunity, namesAlpha$community, namesAlpha$area_numbe)
+      communitySubD = subset(Taxi, Taxi$`Dropoff Community Area` == userCommunity)
+      communitySubD
     })
   
   destToggleReactive <-
@@ -417,6 +414,7 @@ server <- function(input, output, session) {
       FromTo = input$destToggle
       FromTo
     })
+  
   observeEvent(input$initMap_shape_click,{
     p <- input$initMap_shape_click
     print(p$id)
@@ -430,36 +428,7 @@ server <- function(input, output, session) {
       group_tagskm
     }
   })
-  # TODO: implement reactive date ----------------------------------- //
-  # # changes dataset based on day
-  # dateReactive <-
-  #   reactive({
-  #     subset(stationsAll, stationsAll$date == input$inputDate)
-  #   })
-  # 
-  # # shifts data by one day in the past
-  # observeEvent(input$left, {
-  #   updateDateInput(
-  #     session,
-  #     "inputDate",
-  #     value = input$inputDate - days(1),
-  #     min = '2001-01-01',
-  #     max = '2021-11-30'
-  #   )
-  # })
-  # # shifts data by one day in the future
-  # observeEvent(input$right, {
-  #   updateDateInput(
-  #     session,
-  #     "inputDate",
-  #     value = input$inputDate + days(1),
-  #     min = '2001-01-01',
-  #     max = '2021-11-30'
-  #   )
-  # })
-  # ----------------------------------------------------------------- //
   
-
   output$initMap <- renderLeaflet({
     borders
     
@@ -492,18 +461,19 @@ server <- function(input, output, session) {
     # 
     # userCommunity <- mapvalues(userCommunity, namesAlpha$community, namesAlpha$area_numbe)
     
-    newSubset <- communitySubsetReactive()
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
     commTog <- destToggleReactive() 
-    commNum <- communityNumberReactive()
+    # commNum <- communityNumberReactive()
     
     daysColNames = c("Date", "Count")
     # 'Starting from', 'Ending to'
     if(commTog == 'Starting from')
     {
-      dataDaysByYear <- newSubset %>% 
-        group_by(as.Date(newSubset$Date)) %>% dplyr::summarise(count=n())
+      dataDaysByYear <- newPSubset %>% 
+        group_by(as.Date(newPSubset$Date)) %>% dplyr::summarise(count=n())
       
-      dataDaysByYear <- filter(dataDaysByYear, "Pickup Community Area" == commNum)
+      # dataDaysByYear <- filter(dataDaysByYear, "Pickup Community Area" == commNum)
       colnames(dataDaysByYear) = daysColNames
       # Taxi$`Pickup Community Area`
       
@@ -515,10 +485,10 @@ server <- function(input, output, session) {
     }
     else
     {
-      dataDaysByYear <- newSubset %>% 
-        group_by(as.Date(newSubset$Date)) %>% dplyr::summarise(count=n())
+      dataDaysByYear <- newDSubset %>% 
+        group_by(as.Date(newDSubset$Date)) %>% dplyr::summarise(count=n())
       
-      dataDaysByYear <- filter(dataDaysByYear, "Dropoff Community Area" == commNum)
+      # dataDaysByYear <- filter(dataDaysByYear, "Dropoff Community Area" == commNum)
       colnames(dataDaysByYear) = daysColNames
       
       
