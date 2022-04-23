@@ -172,11 +172,6 @@ group_tags2 <- cut(Taxi$`Trip Seconds`,
 group_tags2 <- as_tibble(group_tags2)
 
 
-# ggplot(Taxi, aes(x = Taxi$km, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
-#   labs(x = "Month", y = "Total number of rides") + theme_bw() +
-#   theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
-#   coord_cartesian(expand = FALSE)
-
 breaks <- c(0.6,20,40,60,80,100,120,140,160)
 group_tagskm <- cut(Taxi$km, 
                   breaks=breaks, 
@@ -186,12 +181,10 @@ group_tagskm <- as_tibble(group_tagskm)
 
 ggplot(data = group_tagskm, mapping = aes(x=value)) +
   geom_bar(fill="#ffad33",color="white") +
-  # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
   labs(x='Km Driven') +
-  # scale_y_log10(labels = trans_format("log10", math_format(10^.x))) + #testing shit out
   scale_y_log10(labels = scales::comma) + 
   theme_minimal()
-# view(deez)
+
 #end-barchart stuff --------------------------------
 
 #begin-heatmap sussy
