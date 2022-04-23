@@ -9,7 +9,8 @@
 
 # --------------------------------------------------------------
 # # install.packages("shiny","tidyverse","shinydashboard","lubridate", "sf", "rgdal")
-install.packages("measurements")
+# install.packages("measurements")
+# install.packages("udunits2")
 
 library(shiny)
 library(lubridate)
@@ -20,11 +21,13 @@ library(leaflet)
 library(tidyverse)
 library(DT)
 library(data.table)
-library(dplyr)
 library(sf)
 library(rgdal)
 library(scales)
 library(measurements)
+library(plyr)
+library(dplyr)
+
 
 monthsAbbr <- c(
   "Jan.",
@@ -111,28 +114,28 @@ Taxi <-
   list.files(pattern = "*.csv") %>% 
   map_df(~fread(.))
 #end-merging files together --------------------------------
-# view(head(Taxi))
 
+# adds km conversion to Taxi df
+Taxi$km <- conv_unit(Taxi$`Trip Miles`, "mi", "km")
 # read in boundary data from 
 #   https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6
 boundsRead = readOGR(dsn=getwd(), layer="geo_export")
 # view(head(boundsRead))
 # summary(boundsRead)
 
-
 #start-barchart stuff --------------------------------
 
 # number of rides per day over the year
 daysColNames = c("Date", "Count")
 dataDaysByYear <- Taxi %>% 
-  group_by(as.Date(Taxi$Date)) %>% summarise(count=n())
+  group_by(as.Date(Taxi$Date)) %>% dplyr::summarise(count=n())
 
 colnames(dataDaysByYear) = daysColNames
 #number of rides by hour of day based on start time (midnight through 11pm)
 
 hoursColNames = c("Hour","Count")
 dataHoursByDay <- Taxi %>%
-  group_by(Taxi$Hour) %>% summarise(count=n())
+  group_by(Taxi$Hour) %>% dplyr::summarise(count=n())
 colnames(dataHoursByDay) = hoursColNames
 # view(dataHoursByDay)
 
@@ -142,7 +145,7 @@ dayColNames = c("Day","Count")
 x <- c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")
 y <-c("1","2","3","4","5","6","0")
 dataWeekDay <- Taxi %>%
-  group_by(as.POSIXlt(Taxi$Date)$wday) %>% summarise(count=n())
+  group_by(as.POSIXlt(Taxi$Date)$wday) %>% dplyr::summarise(count=n())
 colnames(dataWeekDay) = dayColNames
 
 dataWeekDay2 <- dataWeekDay %>%
@@ -154,7 +157,7 @@ dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = c("1","2","3","4","5","6",
 # number of rides by month of year (Jan through Dec) TODO still needs to convert numbers to months
 monthsColNames = c("Month","Count")
 dataHoursByMonth <- Taxi %>%
-  group_by(month(Taxi$Date)) %>% summarise(count=n())
+  group_by(month(Taxi$Date)) %>% dplyr::summarise(count=n())
 colnames(dataHoursByMonth) = monthsColNames
 # view(dataHoursByMonth)
 
@@ -178,16 +181,35 @@ group_tags2 <- cut(Taxi$`Trip Seconds`,
                   include.lowest=TRUE, 
                   right=FALSE)
 group_tags2 <- as_tibble(group_tags2)
-# convert.distance(x, from = c("nm", "km", "mi"), to = c("km", "nm", "mi"))
-# kmConvert <- convert.distance(Taxi$`Trip Miles`,from = "mi", to = "km")
 
+
+# ggplot(Taxi, aes(x = Taxi$km, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
+#   labs(x = "Month", y = "Total number of rides") + theme_bw() +
+#   theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
+#   coord_cartesian(expand = FALSE)
+
+breaks <- c(0.6,20,40,60,80,100,120,140,160)
+group_tagskm <- cut(Taxi$km, 
+                  breaks=breaks, 
+                  include.lowest=TRUE, 
+                  right=FALSE)
+group_tagskm <- as_tibble(group_tagskm)
+
+ggplot(data = group_tagskm, mapping = aes(x=value)) +
+  geom_bar(fill="#ffad33",color="white") +
+  # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
+  labs(x='Km Driven') +
+  # scale_y_log10(labels = trans_format("log10", math_format(10^.x))) + #testing shit out
+  scale_y_log10(labels = scales::comma) + 
+  theme_minimal()
+# view(deez)
 #end-barchart stuff --------------------------------
 
 
 # --------------------------------------------------------------
 
 
-
+#dashboard stuff
 #------------------------------------
 ui <- dashboardPage(
   skin = "yellow",
@@ -335,6 +357,7 @@ ui <- dashboardPage(
   
 )
 
+#server logic
 #------------------------------------
 # Define server logic
 #   session as a param allows access to information and functionality relating to the session
