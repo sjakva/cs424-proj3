@@ -8,10 +8,8 @@
 # --------------------------------------------------------------
 
 # --------------------------------------------------------------
-# # install.packages("shiny","tidyverse","shinydashboard","lubridate", "sf", "rgdal")
-# install.packages("measurements")
-# install.packages("udunits2")
-# install.packages("geojsonio")
+# # install.packages("shiny","tidyverse","shinydashboard","lubridate", "sf", "rgdal", "measurements", "geojsonio)
+
 library(shiny)
 library(lubridate)
 library(ggplot2)
@@ -415,12 +413,20 @@ server <- function(input, output, session) {
       FromTo
     })
   
+  # Update community area chosen by selecting area on the map
   observeEvent(input$initMap_shape_click,{
+    # read in map input
     p <- input$initMap_shape_click
     print(p$id)
-    communitySubsetReactive
+    # map area number to community string name
+    areaInput <- mapvalues(p$id, namesAlpha$area_numbe, namesAlpha$community)
+    print(areaInput) # prints community name
+    # input$commToggle = areaInput
+    # update non-reactive input by updating existing selectInput box
+    updateSelectInput(session, "commToggle", selected = areaInput)
   })
   
+  # Returns group used for charting data showing mileage (5th chart)
   unitUsed <- reactive({
     if (input$unitToggle == 'Miles') {
       group_tags    
@@ -429,16 +435,18 @@ server <- function(input, output, session) {
     }
   })
   
+  # Renders leaflet map by reading in boundary data from borders;
+  #   data from https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6
   output$initMap <- renderLeaflet({
     borders
-    
+    # color palette to show heatmap
     pal <- colorNumeric("plasma", NULL)
     
     leaflet(borders) %>%
       addTiles() %>% setView(lng =  -87.6000, lat = 41.9291, zoom = 13) %>%
       addPolygons(color = "black", weight = 1, smoothFactor = 0.5, layerId = ~area_numbe,
                   opacity = 1.0, fillOpacity = 0.5,
-                  fillColor = ~pal(Pickup),
+                  fillColor = ~pal(Pickup), 
                   highlightOptions = highlightOptions(color = "white", weight = 2,
                                                       bringToFront = TRUE), label = ~paste0(community, ": ", formatC(Pickup, big.mark = ","),"%")
       ) %>%
@@ -452,19 +460,9 @@ server <- function(input, output, session) {
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
   output$daysOfYearPlot <- renderPlot({
-    # TODO: reactive title? ----------------------------------------- //
-    # reactiveTitle <- paste("Number of rides by day per ", input$inputYear)
-    # newDate <- dateReactive()
-    # ---------------------------------------------------------------------- //
-    
-    # userCommunity = input$commToggle
-    # 
-    # userCommunity <- mapvalues(userCommunity, namesAlpha$community, namesAlpha$area_numbe)
-    
     newPSubset <- communityPickupSubsetReactive()
     newDSubset <- communityDropoffSubsetReactive()
-    commTog <- destToggleReactive() 
-    # commNum <- communityNumberReactive()
+    commTog <- destToggleReactive()
     
     daysColNames = c("Date", "Count")
     # 'Starting from', 'Ending to'
@@ -502,11 +500,6 @@ server <- function(input, output, session) {
   # ---------------------------------------------------------------------- //
   #   //  Table   //
   output$daysOfYearTable <- DT::renderDataTable(DT::datatable({
-    # TODO: reactive title? ----------------------------------------- //
-    # reactiveTitle <- paste("Number of rides by day per ", input$inputYear)
-    # newDate <- dateReactive()
-    # --------------------------------------------------------------- //
-
     dataDaysByYear$Date <- format(dataDaysByYear$Date, "%b. %d")
     dataDaysByYear$Count <- formatC(dataDaysByYear$Count, big.mark = ",")
     dataDaysByYear
