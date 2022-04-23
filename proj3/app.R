@@ -190,7 +190,7 @@ group_tags2 <- as_tibble(group_tags2)
 
 # view(head(Taxi))
 
-#begin-heatmap sussy
+#begin-heatmap 
 # --------------------------------------------------
 # pickupList <- list()
 pickupTable <- table(Taxi$`Pickup Community Area`)
@@ -226,7 +226,7 @@ for (x in 1:length(pickupList))
 # borders$Pickup = unlist(pickupList,use.names = FALSE)
 # print(typeof(borders))
 
-#end-heatmap sussy
+#end-heatmap 
 # --------------------------------------------------
 
 
