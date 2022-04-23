@@ -149,6 +149,7 @@ colnames(dataHoursByMonth) = monthsColNames
 # view(dataHoursByMonth)
 
 
+
 # TODO: replace 'Trip Miles' with interactive miles/km var
 # number of rides by binned mileage (with an appropriate number of bins)
 breaks <- c(0.5,10,20,30,40,50,60,70,80,90,100)
@@ -158,6 +159,20 @@ group_tags <- cut(Taxi$`Trip Miles`,
                   right=FALSE)
 group_tags <- as_tibble(group_tags)
 # view(binning)
+
+breaks <- c(0.6,20,40,60,80,100,120,140,170)
+group_tagskm <- cut(Taxi$km, 
+                  breaks=breaks, 
+                  include.lowest=TRUE, 
+                  right=FALSE)
+group_tagskm <- as_tibble(group_tagskm)
+
+
+ggplot(data = group_tagskm, mapping = aes(x=value)) +
+  geom_bar(fill="#ffad33",color="white") +
+  labs(x='Km Driven') +
+  scale_y_log10(labels = scales::comma) + 
+  theme_minimal()
 
 
 # number of rides by binned trip time (with an appropriate number of bins) 
@@ -170,18 +185,6 @@ group_tags2 <- cut(Taxi$`Trip Seconds`,
 group_tags2 <- as_tibble(group_tags2)
 
 
-breaks <- c(0.6,20,40,60,80,100,120,140,160)
-group_tagskm <- cut(Taxi$km, 
-                  breaks=breaks, 
-                  include.lowest=TRUE, 
-                  right=FALSE)
-group_tagskm <- as_tibble(group_tagskm)
-
-ggplot(data = group_tagskm, mapping = aes(x=value)) +
-  geom_bar(fill="#ffad33",color="white") +
-  labs(x='Km Driven') +
-  scale_y_log10(labels = scales::comma) + 
-  theme_minimal()
 
 #end-barchart stuff --------------------------------
 
@@ -261,8 +264,8 @@ ui <- dashboardPage(
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
-      selectInput("unitToggle", "Kilometers or miles", c('Kilometers', 'Miles')),
-      selectInput("timeToggle", "Time format", c('12 hour (AM/PM)', '24 hour')),
+      selectInput("unitToggle", "Miles or Kilometers", c('Kilometers', 'Miles'), selected = 'Miles'),
+      selectInput("timeToggle", "Time format", c('12 hour (AM/PM)', '24 hour'), selected = '24 hour'),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       menuItem("", tabName = "cheapBlankSpace", icon = NULL),
       selectInput("commToggle", "Community Area", c('choice 1', 'choice 2')),
@@ -384,9 +387,9 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   unitUsed <- reactive({
     if (input$unitToggle == 'Miles') {
-      unitUsed <- Taxi$`Trip Miles`
+      group_tags    
     } else {
-      unitUsed <- Taxi$`km`
+      group_tagskm
     }
   })
   # TODO: implement reactive date ----------------------------------- //
@@ -553,7 +556,7 @@ server <- function(input, output, session) {
     # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
 
     #TODO fix y axis labels and ya
-    ggplot(data = group_tags, mapping = aes(x=value)) +
+    ggplot(data = unitUsed(), mapping = aes(x=value)) +
       geom_bar(fill="#ffad33",color="white") +
       # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
       labs(x='Miles Driven') +
@@ -563,14 +566,18 @@ server <- function(input, output, session) {
   })
   # ---------------------------------------------------------------------- //
   #   //  Table   //
-  output$mileageTable <- DT::renderDataTable(DT::datatable({
-
-    # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
-    # dataHoursByMonth$Count <- formatC(dataHoursByMonth$Count, big.mark = ",")
-    # dataHoursByMonth
-    # as_tibble(group_tags)
-    group_tags
-  }))
+  output$mileageTable <- DT::renderDataTable(
+    DT::datatable({
+      unitUsed()
+    # # 
+    # #   # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
+    # #   # dataHoursByMonth$Count <- formatC(dataHoursByMonth$Count, big.mark = ",")
+    # #   # dataHoursByMonth
+    # #   # as_tibble(group_tags)
+    # #   group_tags
+    })
+    # unitUsed()
+  )
   # ---------------------------------------------------------------------- //
 
 
