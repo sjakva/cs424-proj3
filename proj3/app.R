@@ -367,7 +367,7 @@ ui <- dashboardPage(
           p(
             "This data is from the Chicago Data Portal. More specifically, the \'Taxi Trips - 2019\'.
                              We were tasked with analyzing and plotting entries over\n
-                            the taxi trips taken in the Chicago community area in 2019, and charting them according to [FIXME: edit after project]."
+                            the taxi trips taken in the Chicago community area in 2019, and charting them according to each individual community and also the entirety of Chicago."
           )
         )
       )
