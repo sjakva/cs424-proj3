@@ -601,6 +601,7 @@ server <- function(input, output, session) {
     dayColNames = c("Day","Count")
     x <- c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")
     y <-c("1","2","3","4","5","6","0")
+    z <-c("Mon","Tues","Wed","Thur","Fri","Sat","Sun")
     
     if(commTog == 'Starting from')
     {
@@ -614,6 +615,7 @@ server <- function(input, output, session) {
       ggplot(dataWeekDay2, aes(x = Day, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
         labs(x = "Day", y = "Total number of rides") + theme_bw() +
         scale_y_continuous(labels = scales::comma) +
+        scale_x_discrete(labels = z) +
         theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
         coord_cartesian(expand = FALSE)
     }
@@ -629,6 +631,7 @@ server <- function(input, output, session) {
       ggplot(dataWeekDay2, aes(x = Day, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
         labs(x = "Day", y = "Total number of rides") + theme_bw() +
         scale_y_continuous(labels = scales::comma) +
+        scale_x_discrete(labels = z) +
         theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
         coord_cartesian(expand = FALSE)
     }
@@ -674,7 +677,7 @@ server <- function(input, output, session) {
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
   output$monthOfYearPlot <- renderPlot({
-    
+    abrev <- c("Jan","Feb","Mar","April","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
     newPSubset <- communityPickupSubsetReactive()
     newDSubset <- communityDropoffSubsetReactive()
     commTog <- destToggleReactive() 
@@ -696,6 +699,7 @@ server <- function(input, output, session) {
     ggplot(dataHoursByMonth, aes(x = Month, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Month", y = "Total number of rides") + theme_bw() +
       scale_y_continuous(labels = scales::comma) +
+      scale_x_discrete(labels = abrev) +
       theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
       coord_cartesian(expand = FALSE)
     
@@ -743,7 +747,8 @@ server <- function(input, output, session) {
     
     # number of rides by binned mileage (with an appropriate number of bins)
     breaks <- c(0.5,10,20,30,40,50,60,70,80,90,100)
-    
+    x <- c("10","20","30","40","50","60","70","80","90","100")
+    y <- c("20","40","60","80","100","120","140","170")
     
     # group_tags <- cut(Taxi$`Trip Miles`, 
     #                   breaks=breaks, 
@@ -766,6 +771,15 @@ server <- function(input, output, session) {
                           include.lowest=TRUE, 
                           right=FALSE)
       }
+      
+      ggplot(data = as_tibble(group_tags), mapping = aes(x=value)) +
+        geom_bar(fill="#ffad33",color="white") +
+        # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
+        labs(x='Miles Driven') +
+        scale_x_discrete(labels = x) +
+        # scale_y_log10(labels = trans_format("log10", math_format(10^.x))) + #testing shit out
+        scale_y_log10(labels = scales::comma) + 
+        theme_minimal()
     }
     else
     {
@@ -784,16 +798,25 @@ server <- function(input, output, session) {
                           include.lowest=TRUE, 
                           right=FALSE)
       }
+      ggplot(data = as_tibble(group_tags), mapping = aes(x=value)) +
+        geom_bar(fill="#ffad33",color="white") +
+        # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
+        labs(x='Km Driven') +
+        scale_x_discrete(labels = y) +
+        # scale_y_log10(labels = trans_format("log10", math_format(10^.x))) + #testing shit out
+        scale_y_log10(labels = scales::comma) + 
+        theme_minimal()
     }
 
     #TODO fix y axis labels and ya
-    ggplot(data = as_tibble(group_tags), mapping = aes(x=value)) +
-      geom_bar(fill="#ffad33",color="white") +
-      # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
-      labs(x='Miles Driven') +
-      # scale_y_log10(labels = trans_format("log10", math_format(10^.x))) + #testing shit out
-      scale_y_log10(labels = scales::comma) + 
-      theme_minimal()
+    # ggplot(data = as_tibble(group_tags), mapping = aes(x=value)) +
+    #   geom_bar(fill="#ffad33",color="white") +
+    #   # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
+    #   labs(x='Miles Driven') +
+    #   scale_x_discrete(labels = x) +
+    #   # scale_y_log10(labels = trans_format("log10", math_format(10^.x))) + #testing shit out
+    #   scale_y_log10(labels = scales::comma) + 
+    #   theme_minimal()
   })
   # ---------------------------------------------------------------------- //
   #   //  Table   //
@@ -806,8 +829,7 @@ server <- function(input, output, session) {
       
       # number of rides by binned mileage (with an appropriate number of bins)
       breaks <- c(0.5,10,20,30,40,50,60,70,80,90,100)
-      
-      
+ 
       # group_tags <- cut(Taxi$`Trip Miles`, 
       #                   breaks=breaks, 
       #                   include.lowest=TRUE, 
@@ -877,7 +899,7 @@ server <- function(input, output, session) {
     monthsColNames = c("Month","Count")
 
     breaks <- c(60,1800,3600,5400,7200,9000,10800,12600,14400,16200,18000)
-    
+    lig <- c("15","30","45","60","75","90","105","120","135","150")
     if(commTog == 'Starting from')
     {
       period <- ms(newPSubset$`Trip Seconds`)
@@ -903,6 +925,7 @@ server <- function(input, output, session) {
       geom_bar(fill="#ffad33",color="white") +
       # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags2))), vjust=-0.5) + #i dont know what this line does
       labs(x='Duration of Ride') +
+      scale_x_discrete(labels = lig) +
       # scale_y_log10(labels = trans_format("log10", math_format(10^.x))) + #testing stuff with this line
       scale_y_log10(labels = scales::comma) + 
       theme_minimal()
