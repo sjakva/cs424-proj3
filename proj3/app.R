@@ -425,9 +425,9 @@ server <- function(input, output, session) {
   # Returns group used for charting data showing mileage (5th chart)
   unitUsed <- reactive({
     if (input$unitToggle == 'Miles') {
-      group_tags    
+      miles <- input$unitToggle    
     } else {
-      group_tagskm
+      km <- input$unitToggle 
     }
   })
   
@@ -496,6 +496,22 @@ server <- function(input, output, session) {
   # ---------------------------------------------------------------------- //
   #   //  Table   //
   output$daysOfYearTable <- DT::renderDataTable(DT::datatable({
+    
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
+    daysColNames = c("Date", "Count")
+    commTog <- destToggleReactive()
+    if(commTog == 'Starting from')
+    {
+      dataDaysByYear <- newPSubset %>% 
+        group_by(as.Date(newPSubset$Date)) %>% dplyr::summarise(count=n())
+    }
+    else
+    {
+      dataDaysByYear <- newDSubset %>% 
+        group_by(as.Date(newDSubset$Date)) %>% dplyr::summarise(count=n())
+    }
+    colnames(dataDaysByYear) = daysColNames
     dataDaysByYear$Date <- format(dataDaysByYear$Date, "%b. %d")
     dataDaysByYear$Count <- formatC(dataDaysByYear$Count, big.mark = ",")
     dataDaysByYear
@@ -544,8 +560,26 @@ server <- function(input, output, session) {
   # ---------------------------------------------------------------------- //
   #   //  Table   //
   output$hoursByDayTable <- DT::renderDataTable(DT::datatable({
-
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
+    commTog <- destToggleReactive()
+    
+    
+    hoursColNames = c("Hour","Count")
+    if(commTog == 'Starting from')
+    {
+      dataHoursByDay <- newPSubset %>%
+        group_by(newPSubset$Hour) %>% dplyr::summarise(count=n())
+      colnames(dataHoursByDay) = hoursColNames
+    }
+    else
+    {
+      dataHoursByDay <- newDSubset %>%
+        group_by(newDSubset$Hour) %>% dplyr::summarise(count=n())
+      colnames(dataHoursByDay) = hoursColNames
+    }
     # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
+    colnames(dataHoursByDay) = hoursColNames
     dataHoursByDay$Count <- formatC(dataHoursByDay$Count, big.mark = ",")
     # as.data.frame.table(dataHoursByDay)
     # view(as.data.frame(dataHoursByDay))
@@ -579,6 +613,7 @@ server <- function(input, output, session) {
       dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = y)
       ggplot(dataWeekDay2, aes(x = Day, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
         labs(x = "Day", y = "Total number of rides") + theme_bw() +
+        scale_y_continuous(labels = scales::comma) +
         theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
         coord_cartesian(expand = FALSE)
     }
@@ -593,6 +628,7 @@ server <- function(input, output, session) {
       dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = y)
       ggplot(dataWeekDay2, aes(x = Day, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
         labs(x = "Day", y = "Total number of rides") + theme_bw() +
+        scale_y_continuous(labels = scales::comma) +
         theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
         coord_cartesian(expand = FALSE)
     }
@@ -600,8 +636,33 @@ server <- function(input, output, session) {
   # ---------------------------------------------------------------------- //
   #   //  Table   //
   output$weekDayTable <- DT::renderDataTable(DT::datatable({
-
-    # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
+    commTog <- destToggleReactive() 
+    
+    dayColNames = c("Day","Count")
+    x <- c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")
+    y <-c("1","2","3","4","5","6","0")
+    if(commTog == 'Starting from')
+    {
+      dataWeekDay <- newPSubset %>%
+        group_by(as.POSIXlt(newPSubset$Date)$wday) %>% dplyr::summarise(count=n())
+      colnames(dataWeekDay) = dayColNames
+      
+      dataWeekDay2 <- dataWeekDay %>%
+        slice(match(y, dataWeekDay$Day))
+      dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = y)
+    }
+    else
+    {
+      dataWeekDay <- newDSubset %>%
+        group_by(as.POSIXlt(newDSubset$Date)$wday) %>% dplyr::summarise(count=n())
+      colnames(dataWeekDay) = dayColNames
+      
+      dataWeekDay2 <- dataWeekDay %>%
+        slice(match(y, dataWeekDay$Day))
+      dataWeekDay2$Day <- factor(dataWeekDay2$Day, levels = y)
+    }
     dataWeekDay2$Count <- formatC(dataWeekDay2$Count, big.mark = ",")
     dataWeekDay2
   }))
@@ -634,6 +695,7 @@ server <- function(input, output, session) {
     
     ggplot(dataHoursByMonth, aes(x = Month, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
       labs(x = "Month", y = "Total number of rides") + theme_bw() +
+      scale_y_continuous(labels = scales::comma) +
       theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
       coord_cartesian(expand = FALSE)
     
@@ -644,6 +706,24 @@ server <- function(input, output, session) {
   #   //  Table   //
   output$monthOfYearTable <- DT::renderDataTable(DT::datatable({
 
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
+    commTog <- destToggleReactive() 
+    
+    monthsColNames = c("Month","Count")
+    if(commTog == 'Starting from')
+    {
+      dataHoursByMonth <- newPSubset %>%
+        group_by(month(newPSubset$Date)) %>% dplyr::summarise(count=n())
+      colnames(dataHoursByMonth) = monthsColNames 
+    }
+    else
+    {
+      dataHoursByMonth <- newDSubset %>%
+        group_by(month(newDSubset$Date)) %>% dplyr::summarise(count=n())
+      colnames(dataHoursByMonth) = monthsColNames 
+    }
+    
     # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
     dataHoursByMonth$Count <- formatC(dataHoursByMonth$Count, big.mark = ",")
     dataHoursByMonth
@@ -656,15 +736,58 @@ server <- function(input, output, session) {
   # ---------------------------------------------------------------------- //
   #   //  Chart   //
   output$mileagePlot <- renderPlot({
-
-    # ggplot(dataHoursByMonth, aes(x = Month, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
-    #   labs(x = "Month", y = "Total number of rides") + theme_bw() +
-    #   theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
-    #   coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
-    # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+    unitsTog <- unitUsed()
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
+    commTog <- destToggleReactive() 
+    
+    # number of rides by binned mileage (with an appropriate number of bins)
+    breaks <- c(0.5,10,20,30,40,50,60,70,80,90,100)
+    
+    
+    # group_tags <- cut(Taxi$`Trip Miles`, 
+    #                   breaks=breaks, 
+    #                   include.lowest=TRUE, 
+    #                   right=FALSE)
+    # group_tags <- as_tibble(group_tags)
+    if(unitsTog == 'Miles')
+    {
+      if(commTog == 'Starting from')
+      {
+        group_tags <- cut(newPSubset$`Trip Miles`, 
+                          breaks=breaks, 
+                          include.lowest=TRUE, 
+                          right=FALSE)
+      }
+      else
+      {      
+        group_tags <- cut(newDSubset$`Trip Miles`, 
+                          breaks=breaks, 
+                          include.lowest=TRUE, 
+                          right=FALSE)
+      }
+    }
+    else
+    {
+      breaks <- c(0.6,20,40,60,80,100,120,140,170)
+      if(commTog == 'Starting from')
+      {
+        group_tags <- cut(newPSubset$`km`, 
+                          breaks=breaks, 
+                          include.lowest=TRUE, 
+                          right=FALSE)
+      }
+      else
+      {      
+        group_tags <- cut(newDSubset$`km`, 
+                          breaks=breaks, 
+                          include.lowest=TRUE, 
+                          right=FALSE)
+      }
+    }
 
     #TODO fix y axis labels and ya
-    ggplot(data = unitUsed(), mapping = aes(x=value)) +
+    ggplot(data = as_tibble(group_tags), mapping = aes(x=value)) +
       geom_bar(fill="#ffad33",color="white") +
       # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags))), vjust=-0.5) + #i dont know what this line does
       labs(x='Miles Driven') +
@@ -676,13 +799,65 @@ server <- function(input, output, session) {
   #   //  Table   //
   output$mileageTable <- DT::renderDataTable(
     DT::datatable({
-      unitUsed()
+      unitsTog <- unitUsed()
+      newPSubset <- communityPickupSubsetReactive()
+      newDSubset <- communityDropoffSubsetReactive()
+      commTog <- destToggleReactive() 
+      
+      # number of rides by binned mileage (with an appropriate number of bins)
+      breaks <- c(0.5,10,20,30,40,50,60,70,80,90,100)
+      
+      
+      # group_tags <- cut(Taxi$`Trip Miles`, 
+      #                   breaks=breaks, 
+      #                   include.lowest=TRUE, 
+      #                   right=FALSE)
+      # group_tags <- as_tibble(group_tags)
+      if(unitsTog == 'Miles')
+      {
+        if(commTog == 'Starting from')
+        {
+          group_tags <- cut(newPSubset$`Trip Miles`, 
+                            breaks=breaks, 
+                            include.lowest=TRUE, 
+                            right=FALSE)
+        }
+        else
+        {      
+          group_tags <- cut(newDSubset$`Trip Miles`, 
+                            breaks=breaks, 
+                            include.lowest=TRUE, 
+                            right=FALSE)
+        }
+      }
+      else
+      {
+        breaks <- c(0.6,20,40,60,80,100,120,140,170)
+        if(commTog == 'Starting from')
+        {
+          group_tags <- cut(newPSubset$`km`, 
+                            breaks=breaks, 
+                            include.lowest=TRUE, 
+                            right=FALSE)
+        }
+        else
+        {      
+          group_tags <- cut(newDSubset$`km`, 
+                            breaks=breaks, 
+                            include.lowest=TRUE, 
+                            right=FALSE)
+        }
+      }
+      # group_tags
     # # 
     # #   # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
     # #   # dataHoursByMonth$Count <- formatC(dataHoursByMonth$Count, big.mark = ",")
     # #   # dataHoursByMonth
-    # #   # as_tibble(group_tags)
+      as_tibble(group_tags)
+      # datatable(group_tags)
     # #   group_tags
+      # group_tags$Count <- formatC(group_tags$Count, big.mark = ",")
+      # group_tags
     })
     # unitUsed()
   )
@@ -695,12 +870,35 @@ server <- function(input, output, session) {
   #   //  Chart   //
   output$timePlot <- renderPlot({
 
-    # ggplot(dataHoursByMonth, aes(x = Month, y = Count)) + geom_bar(stat = "identity", fill = "#ffad33", width = 0.8) +
-    #   labs(x = "Month", y = "Total number of rides") + theme_bw() +
-    #   theme(plot.title = element_text(hjust = 0.5, size=20), axis.title=element_text(size=12), axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)) +
-    #   coord_cartesian(expand = FALSE) #+ scale_x_discrete(labels=c(0:23))
-    # scale_x_date(date_breaks = "day", date_labels = "%b. %d") + coord_cartesian(expand = FALSE)
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
+    commTog <- destToggleReactive() 
+    
+    monthsColNames = c("Month","Count")
 
+    breaks <- c(60,1800,3600,5400,7200,9000,10800,12600,14400,16200,18000)
+    
+    if(commTog == 'Starting from')
+    {
+      period <- ms(newPSubset$`Trip Seconds`)
+      group_tags2 <- cut(newPSubset$`Trip Seconds`, 
+                         breaks=breaks, 
+                         include.lowest=TRUE, 
+                         right=FALSE)
+    }
+    else
+    {
+      period <- ms(newDSubset$`Trip Seconds`)
+      group_tags2 <- cut(newDSubset$`Trip Seconds`, 
+                         breaks=breaks, 
+                         include.lowest=TRUE, 
+                         right=FALSE)
+    }
+
+    group_tags2 <- as_tibble(group_tags2)
+    
+    
+    
     ggplot(data = group_tags2, mapping = aes(x=value)) +
       geom_bar(fill="#ffad33",color="white") +
       # stat_count(geom="text", aes(label=sprintf("%.4f",..count../length(group_tags2))), vjust=-0.5) + #i dont know what this line does
@@ -713,10 +911,32 @@ server <- function(input, output, session) {
   #   //  Table   //
   output$timeTable <- DT::renderDataTable(DT::datatable({
 
-    # dataHoursByDay$Hour <- format(dataDaysByYear$Date, "%b. %d")
-    # dataHoursByMonth$Count <- formatC(dataHoursByMonth$Count, big.mark = ",")
-    # dataHoursByMonth
-    # as_tibble(group_tags2)
+    newPSubset <- communityPickupSubsetReactive()
+    newDSubset <- communityDropoffSubsetReactive()
+    commTog <- destToggleReactive() 
+    
+    monthsColNames = c("Month","Count")
+    
+    breaks <- c(60,1800,3600,5400,7200,9000,10800,12600,14400,16200,18000)
+    
+    if(commTog == 'Starting from')
+    {
+      period <- ms(newPSubset$`Trip Seconds`)
+      group_tags2 <- cut(newPSubset$`Trip Seconds`, 
+                         breaks=breaks, 
+                         include.lowest=TRUE, 
+                         right=FALSE)
+    }
+    else
+    {
+      period <- ms(newDSubset$`Trip Seconds`)
+      group_tags2 <- cut(newDSubset$`Trip Seconds`, 
+                         breaks=breaks, 
+                         include.lowest=TRUE, 
+                         right=FALSE)
+    }
+    
+    group_tags2 <- as_tibble(group_tags2)
     group_tags2
   }))
   # ---------------------------------------------------------------------- //
